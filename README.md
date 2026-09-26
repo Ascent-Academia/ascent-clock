@@ -1,48 +1,109 @@
-# Ascent Academia · Exam Clock
+<p align="center">
+  <img src="brand/ascent-full-logo-purple.svg" alt="Ascent Academia" width="260">
+</p>
 
-A clean, full-screen digital clock (with seconds) for running VCE trial exams at Ascent Academia.
-It is built to be projected on a large TV or 4K projector and works in any modern browser with nothing to install.
+# Exam Clock
+
+A clean, full-screen exam clock for running VCE trial exams at Ascent Academia.
+It shows the time with seconds, reading and writing time, regular time checks and the time remaining. It is designed to be projected on a large TV or 4K projector.
+
+**Open the clock:** https://ascentacademia.github.io/ascent-clock/
+
+It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, tablet or phone, with nothing to install.
+
+---
+
+## On exam day
+
+1. Open the clock on the computer connected to the TV or projector.
+2. Press <kbd>S</kbd> to open the settings panel. Pick a **VCE preset** (or type your own title and times), then **Save**.
+3. Check **Time accuracy** at the bottom of the panel says the clock is verified.
+4. Press <kbd>F</kbd> for full screen.
+5. Press **Start exam** (or <kbd>Space</kbd>) when reading time begins. You can also set a **Scheduled start** time and the clock starts itself.
+
+The controls and mouse cursor fade out after a few seconds, so only the clock is shown. Move the mouse or press a key to bring them back.
 
 ## Features
 
-- **Large, animated clock** (HH:MM:SS). Each digit rolls smoothly when it changes. It scales from a phone up to a 4K screen.
-- **Ascent Academia branding**: the official logo (`brand/`), brand violet `#8c68ac` and the Manrope typeface, bundled so it works offline.
-- **VCE presets**: one click sets the standard reading and writing time for Mathematical Methods, Specialist and General Mathematics (Exams 1 and 2), Physics and Chemistry. All use 15 minutes of reading time.
-- **Exam timing**: optional reading time, then writing time. It shows the start time, time elapsed, time remaining, the finish time and a progress bar.
-- **Time-check announcements**: a full-screen banner such as "10 minutes have passed" appears every 5/10/15/20/30/60 minutes (you choose). Warnings appear at 60/30/15/10/5/1 minutes remaining, plus "Time is up — pens down" at the end. An optional soft chime can play with each one.
-- **Accurate time**
-  - Updates are aligned to the exact start of each second, and a watchdog fixes any late timer within 0.2 s.
-  - Elapsed and remaining times are worked out from timestamps, not by counting ticks, so they never drift.
-  - The device clock is checked against internet time (the web server's clock) when the page loads, every 30 minutes, and on demand under Settings → Time accuracy. If the device clock is out by more than a second, the display is corrected automatically.
-- **Pause / resume** for interruptions such as fire drills. The finish time moves forward to match.
-- **Scheduled start**: set a start time (e.g. 09:00) and the clock counts down, then starts itself.
-- **Survives a refresh**: the running exam is saved in the browser. Two tabs on the same computer (e.g. a laptop plus a TV on an extended display) stay in sync.
-- **Full screen** with one click, the <kbd>F</kbd> key or a double-click. The screen is kept awake (Wake Lock), and the mouse cursor and controls hide when idle.
-- **Accessible**: Midnight, Daylight and High-contrast themes, full keyboard control, screen-reader announcements, and a reduce-motion option (it also follows the OS setting).
-- **Works offline** once loaded (a service worker caches the app), so a Wi-Fi drop mid-exam doesn't matter.
+### The clock
+- Large HH:MM:SS display with smoothly rolling digits, sized to fill anything from a phone to a 4K screen.
+- 24-hour or 12-hour format, and the date in Australian style ("Saturday 26 September 2026").
+- Three themes: **Midnight** (dark, the default for projectors), **Daylight** (for bright rooms) and **High contrast** (black and white, for maximum legibility).
+
+### Exam timing
+- Optional **reading time**, then **writing time**. The panel below the clock shows when writing began, time elapsed, time remaining and the finish time.
+- A progress bar with a tick at every announcement interval.
+- **Pause / resume** for interruptions such as fire drills. The finish time moves forward by the time spent paused.
+- Writing time of `0` gives an open-ended timer that just counts up.
+
+### Announcements
+- A large banner appears across the screen at regular intervals (every 5, 10, 15, 20, 30 or 60 minutes), for example "30 minutes have passed · 1 hour 30 minutes remaining".
+- Warnings when 60, 30, 15, 10, 5 or 1 minutes remain (choose any combination).
+- Banners also mark the start of reading time, the start of writing time, and "Time is up — please put your pens down" at the end.
+- An optional soft chime can play with each announcement. It is off by default.
+
+### VCE presets
+
+| Preset | Reading | Writing |
+| --- | --- | --- |
+| Mathematical Methods — Exam 1 | 15 min | 1 hour |
+| Mathematical Methods — Exam 2 | 15 min | 2 hours |
+| Specialist Mathematics — Exam 1 | 15 min | 1 hour |
+| Specialist Mathematics — Exam 2 | 15 min | 2 hours |
+| General Mathematics — Exam 1 | 15 min | 1 hour 30 min |
+| General Mathematics — Exam 2 | 15 min | 1 hour 30 min |
+| Physics | 15 min | 2 hours 30 min |
+| Chemistry | 15 min | 2 hours 30 min |
+
+Check these against the current VCAA exam timetable each year. The presets are set in `PRESETS` near the top of `app.js`.
+
+### Accurate time
+- The display updates exactly on the start of each second, and a safety check catches any late update within 0.2 s.
+- Elapsed and remaining times are worked out from the exam's start time, not by counting ticks, so they never drift, even over a three-hour exam.
+- The computer's clock is checked against internet time when the page opens, every 30 minutes, and when you press **Check clock now**. If the computer's clock is wrong by more than a second, the display corrects itself, shows a small note under the date, and explains it in the settings panel.
+- If there is no internet connection, the clock uses the computer's own time. Make sure the computer's date and time are set automatically.
+
+### Reliability and accessibility
+- **Survives a refresh:** a running exam is saved in the browser and picks up where it left off. Two windows on the same computer (e.g. a laptop screen and a TV) stay in sync.
+- **Works offline** once it has been opened, so a Wi-Fi drop mid-exam doesn't matter.
+- **Keeps the screen awake** while an exam is running or the clock is in full screen, where the browser supports it.
+- Full keyboard control, screen-reader announcements for each time check, and a **Reduce motion** option (it also follows the computer's accessibility setting).
 
 ## Keyboard shortcuts
 
 | Key | Action |
 | --- | --- |
-| <kbd>F</kbd> | Toggle full screen |
-| <kbd>Space</kbd> | Start / pause / resume the exam |
-| <kbd>S</kbd> | Open settings |
-| <kbd>T</kbd> | Cycle theme |
-| <kbd>R</kbd> | Reset the exam |
-| <kbd>Esc</kbd> | Dismiss an announcement |
+| <kbd>F</kbd> (or double-click the clock) | Full screen on / off |
+| <kbd>Space</kbd> | Start, pause or resume the exam |
+| <kbd>S</kbd> | Open the settings panel |
+| <kbd>T</kbd> | Switch theme |
+| <kbd>R</kbd>, then <kbd>R</kbd> again | Reset the exam |
+| <kbd>Esc</kbd> | Close the banner or the settings panel |
 
-## Running it
+## Hosting
 
-It is a static site (`index.html`, `styles.css`, `app.js`) with no build step.
+The site is published with GitHub Pages from the `main` branch. To set it up (one time only): in the repository open **Settings → Pages**, choose **Deploy from a branch**, then select `main` and `/ (root)` and **Save**. After each change to `main`, the live clock updates within a minute or two.
 
-- **Quickest:** open `index.html` in a browser. Everything works except the internet-time check and offline caching, which need the page to be served over http(s).
-- **Locally over http:** `npx http-server .` (or `python3 -m http.server`) and open the printed address.
-- **Share with everyone (GitHub Pages):** in the repository go to *Settings → Pages*, choose *Deploy from a branch*, select `main` and `/ (root)`. The clock will then be at `https://<owner>.github.io/ascent-clock/`.
+To run it on your own computer instead:
 
-## Tips for exam rooms
+- Open `index.html` in a browser. Everything works except the internet-time check and offline mode, which need the page to be served from a web address.
+- Or serve the folder: `npx http-server .` (or `python3 -m http.server`) and open the address it prints.
 
-1. Open the clock on the computer connected to the TV or projector and press <kbd>F</kbd>.
-2. Press <kbd>S</kbd> to open the settings panel, pick a VCE preset or set the exam title, reading and writing time, and how often to announce.
-3. Press **Start exam** (or <kbd>Space</kbd>) when reading time begins, or set a *Scheduled start*.
-4. Check *Settings → Time accuracy* says the clock is verified.
+## Project files
+
+| Path | What it is |
+| --- | --- |
+| `index.html` | Page structure, including the inline logo and the settings panel |
+| `styles.css` | Layout, themes and animations. Brand colours are the `--brand-*` variables at the top |
+| `app.js` | Clock, exam timing, announcements, time check and settings |
+| `sw.js` | Offline support. Increase `CACHE` (e.g. `ascent-clock-v3`) whenever you change a file, so browsers pick up the new version |
+| `brand/` | Official Ascent Academia logo files (brand violet `#8c68ac`) |
+| `fonts/` | Manrope typeface, stored locally so the clock works offline |
+| `icon.svg`, `manifest.webmanifest` | Browser tab icon and install-as-app details |
+
+There is no build step. Edit the files and push.
+
+## Credits
+
+Manrope by Mikhail Sharanda, used under the [SIL Open Font License 1.1](https://openfontlicense.org).
+Logo and brand © Ascent Academia.
