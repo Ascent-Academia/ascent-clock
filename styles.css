@@ -142,6 +142,7 @@ body {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   padding: var(--gutter);
   padding-left: max(var(--gutter), env(safe-area-inset-left));
   padding-right: max(var(--gutter), env(safe-area-inset-right));
@@ -181,6 +182,7 @@ body {
 .brand {
   display: flex;
   align-items: center;
+  max-width: 100%;
   gap: 1.6vmin;
   min-width: 0;
 }
@@ -225,6 +227,36 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Long titles glide sideways to show the whole title, then glide back.
+   JS sets --title-shift and --title-duration only when the title overflows. */
+.exam-name-inner { display: inline-block; }
+.exam-name.is-scrolling {
+  text-overflow: clip;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 1.2em), transparent);
+          mask-image: linear-gradient(90deg, #000 calc(100% - 1.2em), transparent);
+}
+.exam-name.is-scrolling .exam-name-inner {
+  animation: title-scroll var(--title-duration, 12s) ease-in-out infinite;
+}
+@keyframes title-scroll {
+  0%, 15%   { transform: translateX(0); }
+  45%, 60%  { transform: translateX(var(--title-shift, 0)); }
+  90%, 100% { transform: translateX(0); }
+}
+
+/* Centre the two text lines on the logo by the letters themselves: trim each
+   line box to cap height and baseline, so empty space above the capitals and
+   below the baseline doesn't push the text off-centre. */
+@supports (text-box: trim-both cap alphabetic) {
+  .brand-text { gap: clamp(5px, .9vmin, 24px); }
+  .brand-kicker,
+  .exam-name,
+  .exam-name-inner { text-box: trim-both cap alphabetic; }
+  /* Keep room for ascenders and descenders (e.g. the y in "Physics"), which
+     the clipping for long titles would otherwise cut off */
+  .exam-name { padding-block: .15em .3em; margin-block: -.15em -.3em; }
 }
 
 .controls {

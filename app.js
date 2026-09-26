@@ -83,6 +83,7 @@
   const el = {
     app: $("app"),
     examName: $("exam-name"),
+    examNameInner: $("exam-name-inner"),
     clock: $("clock"),
     clockSr: $("clock-sr"),
     ampm: $("ampm"),
@@ -789,6 +790,29 @@
     el.live.textContent = "Exam ended. Showing the clock.";
   }
 
+  // ---------- Long exam titles scroll ----------
+  const prefersReducedMotion = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+
+  function updateTitleScroll() {
+    const outer = el.examName;
+    outer.classList.remove("is-scrolling");
+    const overflow = el.examNameInner.scrollWidth - outer.clientWidth;
+    const still = settings.reduceMotion || (prefersReducedMotion && prefersReducedMotion.matches);
+    if (overflow <= 2 || still) return;   // fits, or motion is off: keep the "…"
+    const shift = overflow + outer.clientWidth * 0.04;  // a little past the end
+    // Glide at a comfortable reading speed, relative to the text size
+    const pxPerSec = parseFloat(getComputedStyle(outer).fontSize) * 2.2;
+    const glideSec = Math.max(2, shift / pxPerSec);
+    outer.style.setProperty("--title-shift", `${-shift}px`);
+    outer.style.setProperty("--title-duration", `${(glideSec / 0.3).toFixed(1)}s`);
+    outer.classList.add("is-scrolling");
+  }
+
+  if ("ResizeObserver" in window) new ResizeObserver(() => updateTitleScroll()).observe(el.examName.parentElement);
+  else window.addEventListener("resize", updateTitleScroll);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateTitleScroll);
+  if (prefersReducedMotion && prefersReducedMotion.addEventListener) prefersReducedMotion.addEventListener("change", updateTitleScroll);
+
   // ---------- Theme / motion / display ----------
   function applySettings() {
     document.documentElement.dataset.clockTheme = settings.theme;
@@ -796,7 +820,8 @@
     else delete document.documentElement.dataset.motion;
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#120d19";
-    el.examName.textContent = settings.examName || DEFAULTS.examName;
+    el.examNameInner.textContent = settings.examName || DEFAULTS.examName;
+    updateTitleScroll();
     document.title = `${settings.examName || "Exam"} · Ascent Academia Clock`;
     el.date.hidden = !settings.showDate;
     lastMinuteSr = -1;

@@ -33,6 +33,7 @@ Before an exam starts, the screen shows only the clock and date. The controls an
 - Large HH:MM:SS display with smoothly rolling digits, sized to fill anything from a phone to a 4K screen.
 - 24-hour or 12-hour format, and the date in Australian style ("Saturday 26 September 2026").
 - Three themes: **Midnight** (dark, the default for projectors), **Daylight** (for bright rooms) and **High contrast** (black and white, for maximum legibility).
+- The exam title sits beside the Ascent Academia logo. A title too long to fit glides sideways to show the rest, then back (it stays still with "…" when Reduce motion is on).
 
 ### Exam timing
 - Optional **reading time**, then **writing time**, set either as lengths or as clock times (reading starts / writing starts / exam ends).
