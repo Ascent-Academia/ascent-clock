@@ -371,7 +371,9 @@
     else phase = "finished";
 
     const writingElapsed = Math.max(0, e - R);
-    const remaining = openEnded ? null : Math.max(0, R + D - e);
+    // Writing time left. It holds at the full writing time until writing
+    // starts, so it only counts down once the exam proper has begun.
+    const remaining = openEnded ? null : Math.min(D, Math.max(0, R + D - e));
     // Wall-clock finish time accounts for time spent paused
     const pausedMs = (exam.pausedTotal || 0) + (exam.pausedAt ? now - exam.pausedAt : 0);
     const writingStartAt = exam.startAt + R + pausedMs;
@@ -629,7 +631,8 @@
     el.milestones.hidden = st.openEnded;
 
     if (!st.openEnded) {
-      el.statRemainingLabel.textContent = st.phase === "finished" ? "Finished" : "Time remaining";
+      el.statRemainingLabel.textContent = st.phase === "finished" ? "Finished"
+        : st.phase === "writing" ? "Time remaining" : "Writing time";
       el.statRemaining.textContent = formatCountdown(st.remaining);
       el.statEnd.textContent = formatClockTime(new Date(st.endAt));
 

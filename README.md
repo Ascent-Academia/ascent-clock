@@ -36,7 +36,7 @@ Before an exam starts, the screen shows only the clock and date. The controls an
 
 ### Exam timing
 - Optional **reading time**, then **writing time**, set either as lengths or as clock times (reading starts / writing starts / exam ends).
-- The panel below the clock shows when writing began, time elapsed, time remaining and the finish time.
+- The panel below the clock shows when writing began, time elapsed, time remaining and the finish time. **Time remaining** counts down writing time only: before writing starts (during a countdown or reading time) it shows the full writing time and holds still.
 - A progress bar marked with the actual clock times (e.g. 9:25, 9:35 … 11:45).
 - **Skip to writing** ends reading time early and starts writing time straight away. While counting down to a scheduled start, the same button reads **Start now**. Both need a second press to confirm.
 - **Pause / resume** for interruptions such as fire drills. The finish time moves forward by the time spent paused.
