@@ -789,17 +789,59 @@ kbd {
 .field-note { margin: 0; font-size: .9em; color: var(--fg-muted); line-height: 1.4; }
 
 .timing-summary {
-  margin: 0;
-  padding: 10px 14px;
-  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
   line-height: 1.4;
 }
 .timing-summary:empty { display: none; }
 .timing-summary.is-error { color: var(--danger); border-color: var(--danger); }
+
+.tl-note {
+  font-size: .8em;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.tl-row {
+  display: grid;
+  grid-template-columns: auto 5.2em 1fr auto;
+  align-items: baseline;
+  gap: 10px;
+}
+.tl-dot {
+  width: .7em;
+  height: .7em;
+  border-radius: 50%;
+  background: var(--tl-color, var(--accent));
+  align-self: center;
+}
+.tl-row.reading { --tl-color: var(--reading); }
+.tl-row.writing { --tl-color: var(--accent); }
+.tl-name { color: var(--fg-muted); font-weight: 700; }
+.tl-time {
+  font-size: 1.3em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+.tl-time .tl-arrow { color: var(--fg-muted); font-weight: 600; margin-inline: .3em; }
+.tl-len { color: var(--fg-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.settings input[type="time"].time-lg {
+  font-size: 1.4em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .03em;
+  min-height: 56px;
+}
 
 .segmented {
   display: grid;

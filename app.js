@@ -96,6 +96,7 @@
     skipLabel: $("skip-label"),
     announceDismiss: $("announce-dismiss"),
     timingSummary: $("timing-summary"),
+    startTimeField: $("start-time-field"),
     timingDuration: $("timing-duration"),
     timingClock: $("timing-clock"),
     exitBtn: $("exit-btn"),
@@ -812,6 +813,7 @@
     f.readingMin.value = settings.readingMin;
     f.durationMin.value = settings.durationMin;
     f.scheduledStart.value = settings.scheduledStart;
+    f.startWhen.value = settings.scheduledStart ? "later" : "now";
     f.timingMode.value = settings.timingMode === "clock" ? "clock" : "duration";
     f.readingStart.value = settings.readingStart;
     f.writingStart.value = settings.writingStart;
@@ -844,8 +846,8 @@
     if (f.timingMode.value === "clock") {
       const r = readClockTimes(f);
       later = !r.error && scheduledStartMs(r.start) > now();
-    } else if (f.scheduledStart.value) {
-      later = scheduledStartMs(f.scheduledStart.value) > now();
+    } else if (chosenStart(f)) {
+      later = scheduledStartMs(chosenStart(f)) > now();
     }
     el.settingsSave.textContent = later ? "Schedule exam" : "Start exam";
   }
@@ -899,37 +901,71 @@
     return { R, D, start: minToHm(rs), writing: minToHm(ws), end: minToHm(end) };
   }
 
+  // The start time only counts when "At a set time" is chosen
+  const chosenStart = (f) => (f.startWhen.value === "later" ? f.scheduledStart.value : "");
+
+  /** Show the schedule as a small timeline: one row for reading, one for writing. */
+  function setTimingSummary({ note = "", rows = [], error = "" }) {
+    const box = el.timingSummary;
+    box.textContent = "";
+    box.classList.toggle("is-error", !!error);
+    if (error) { box.textContent = error; return; }
+    const make = (tag, cls, text) => {
+      const n = document.createElement(tag);
+      n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    };
+    if (note) box.appendChild(make("div", "tl-note", note));
+    for (const r of rows) {
+      const row = make("div", `tl-row ${r.kind}`);
+      row.appendChild(make("span", "tl-dot"));
+      row.appendChild(make("span", "tl-name", r.name));
+      const time = make("span", "tl-time");
+      time.append(r.from, make("span", "tl-arrow", "→"), r.to);
+      row.appendChild(time);
+      row.appendChild(make("span", "tl-len", r.len));
+      box.appendChild(row);
+    }
+  }
+
+  function scheduleRows(startMin, R, D) {
+    const rows = [];
+    if (R) rows.push({ kind: "reading", name: "Reading", from: hmLabel(minToHm(startMin)),
+      to: hmLabel(minToHm(startMin + R)), len: formatShortMinutes(R) });
+    rows.push({ kind: "writing", name: "Writing", from: hmLabel(minToHm(startMin + R)),
+      to: D ? hmLabel(minToHm(startMin + R + D)) : "no set end", len: D ? formatShortMinutes(D) : "" });
+    return rows;
+  }
+
   function updateTimingForm() {
     const f = el.form.elements;
     const clock = f.timingMode.value === "clock";
     el.timingDuration.hidden = clock;
     el.timingClock.hidden = !clock;
-    let text = "";
-    let error = false;
+    const later = f.startWhen.value === "later";
+    el.startTimeField.hidden = !later;
+
     if (clock) {
       const r = readClockTimes(f);
       if (r.error) {
         const empty = !f.readingStart.value && !f.writingStart.value && !f.endTime.value;
-        text = empty ? "" : r.error;
-        error = !empty;
+        setTimingSummary({ error: empty ? "" : r.error });
       } else {
-        text = (r.R ? `Reading ${hmLabel(r.start)}–${hmLabel(r.writing)} (${formatShortMinutes(r.R)}) · ` : "") +
-          `Writing ${hmLabel(r.writing)}–${hmLabel(r.end)} (${formatShortMinutes(r.D)})`;
+        setTimingSummary({ note: "Schedule", rows: scheduleRows(hmToMin(r.start), r.R, r.D) });
       }
     } else {
       const R = clampInt(f.readingMin.value, 0, 60, 0);
       const D = clampInt(f.durationMin.value, 0, 600, 0);
-      const st = hmToMin(f.scheduledStart.value);
-      if (st !== null && D) {
-        text = (R ? `Reading ${hmLabel(minToHm(st))}–${hmLabel(minToHm(st + R))} · ` : "") +
-          `Writing ${hmLabel(minToHm(st + R))}–${hmLabel(minToHm(st + R + D))}`;
+      const st = hmToMin(chosenStart(f));
+      if (later && st === null) {
+        setTimingSummary({ error: "Choose a start time." });
       } else {
-        text = (R ? `${formatShortMinutes(R)} reading + ` : "") + (D ? `${formatShortMinutes(D)} writing` : "writing with no set end");
-        if (D && settingsMode === "start") text += ` · ends ${formatClockTime(new Date(now() + (R + D) * MIN))} if started now`;
+        const d = new Date(now());
+        const startMin = st ?? d.getHours() * 60 + d.getMinutes();
+        setTimingSummary({ note: st === null ? "If you start now" : "Schedule", rows: scheduleRows(startMin, R, D) });
       }
     }
-    el.timingSummary.textContent = text;
-    el.timingSummary.classList.toggle("is-error", error);
     updateSaveLabel();
   }
 
@@ -937,7 +973,7 @@
   function onTimingModeChange() {
     const f = el.form.elements;
     if (f.timingMode.value === "clock") {
-      const st = hmToMin(f.scheduledStart.value);
+      const st = hmToMin(chosenStart(f));
       if (st !== null && !f.writingStart.value && !f.endTime.value) {
         const R = clampInt(f.readingMin.value, 0, 60, 0);
         const D = clampInt(f.durationMin.value, 0, 600, 0);
@@ -951,6 +987,7 @@
         f.readingMin.value = r.R;
         f.durationMin.value = r.D;
         f.scheduledStart.value = r.start;
+        f.startWhen.value = "later";
       }
     }
     updateTimingForm();
@@ -983,6 +1020,7 @@
     el.form.addEventListener("input", (e) => {
       if (e.target.name === "timingMode") onTimingModeChange();
       else updateTimingForm();
+      if (e.target.name === "startWhen" && e.target.value === "later") el.form.elements.scheduledStart.focus();
     });
   }
 
@@ -999,11 +1037,15 @@
     if (clockMode) {
       clockTimes = readClockTimes(f);
       if (clockTimes.error) {
-        el.timingSummary.textContent = clockTimes.error;
-        el.timingSummary.classList.add("is-error");
+        setTimingSummary({ error: clockTimes.error });
         clockTimes.field.focus();
         return;
       }
+    }
+    if (!clockMode && f.startWhen.value === "later" && !f.scheduledStart.value) {
+      setTimingSummary({ error: "Choose a start time, or pick “When I press Start”." });
+      f.scheduledStart.focus();
+      return;
     }
     const prev = settings;
     settings = {
@@ -1011,7 +1053,7 @@
       examName: f.examName.value.trim() || DEFAULTS.examName,
       readingMin: clampInt(f.readingMin.value, 0, 60, DEFAULTS.readingMin),
       durationMin: clampInt(f.durationMin.value, 0, 600, DEFAULTS.durationMin),
-      scheduledStart: f.scheduledStart.value,
+      scheduledStart: chosenStart(f),
       intervalMin: clampInt(f.intervalMin.value, 0, 60, DEFAULTS.intervalMin),
       bannerSec: clampInt(f.bannerSec.value, 3, 60, DEFAULTS.bannerSec),
       sound: f.sound.checked,

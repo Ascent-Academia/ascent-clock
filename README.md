@@ -18,10 +18,10 @@ It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, 
 1. Open the clock on the computer connected to the TV or projector, and press <kbd>F</kbd> for full screen.
 2. Press **Start exam** (or <kbd>Space</kbd>). A setup panel opens. Nothing starts until you confirm.
 3. Pick a **VCE preset** (or type your own title), then set the times one of two ways:
-   - **Length**: reading and writing time in minutes, plus an optional scheduled start.
+   - **Length**: reading and writing time in minutes. Choose whether the exam starts **when you press Start** or **at a set time**.
    - **Clock time**: when reading starts, when writing starts and when the exam ends (e.g. 9:00 / 9:15 / 11:45).
 
-   The box below the times shows the resulting schedule.
+   The schedule box below shows exactly when reading and writing run, e.g. Reading 9:00 → 9:15, Writing 9:15 → 11:15.
 4. Press **Start exam**. If the start is in the future the button says **Schedule exam**, and the clock counts down and starts by itself.
 5. When you're finished, press **Exit exam** to go back to the plain clock.
 

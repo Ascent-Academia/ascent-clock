@@ -161,13 +161,21 @@
               <input type="number" name="readingMin" min="0" max="60" step="1" inputmode="numeric">
             </label>
             <label class="field">
-              <span>Writing time <small>(minutes, 0 = no end)</small></span>
+              <span>Writing time <small>(minutes)</small></span>
               <input type="number" name="durationMin" min="0" max="600" step="1" inputmode="numeric">
             </label>
           </div>
-          <label class="field">
-            <span>Scheduled start <small>(optional, or start with the button)</small></span>
-            <input type="time" name="scheduledStart">
+          <p class="field-note">Set writing time to 0 for a timer with no set end.</p>
+          <div class="field">
+            <span id="start-when-label">Exam starts</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="start-when-label">
+              <label><input type="radio" name="startWhen" value="now"><span>When I press Start</span></label>
+              <label><input type="radio" name="startWhen" value="later"><span>At a set time</span></label>
+            </div>
+          </div>
+          <label class="field" id="start-time-field" hidden>
+            <span>Start time</span>
+            <input type="time" name="scheduledStart" class="time-lg">
           </label>
         </div>
 
@@ -189,7 +197,7 @@
           <p class="field-note">After you press Start exam, the clock counts down to reading time and runs by itself.</p>
         </div>
 
-        <p class="timing-summary" id="timing-summary" aria-live="polite"></p>
+        <div class="timing-summary" id="timing-summary" aria-live="polite"></div>
       </fieldset>
 
       <fieldset>
