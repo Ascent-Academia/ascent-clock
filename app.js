@@ -9,9 +9,22 @@
   const STORAGE_EXAM = "ascent-clock:exam";
   const THEMES = ["dark", "light", "contrast"];
 
+  // Standard VCE end-of-year exam timings (15 minutes reading time + writing time).
+  // Check the current VCAA timetable if a study design changes.
+  const PRESETS = [
+    { id: "methods-1", name: "Mathematical Methods — Exam 1", readingMin: 15, durationMin: 60 },
+    { id: "methods-2", name: "Mathematical Methods — Exam 2", readingMin: 15, durationMin: 120 },
+    { id: "specialist-1", name: "Specialist Mathematics — Exam 1", readingMin: 15, durationMin: 60 },
+    { id: "specialist-2", name: "Specialist Mathematics — Exam 2", readingMin: 15, durationMin: 120 },
+    { id: "general-1", name: "General Mathematics — Exam 1", readingMin: 15, durationMin: 90 },
+    { id: "general-2", name: "General Mathematics — Exam 2", readingMin: 15, durationMin: 90 },
+    { id: "physics", name: "Physics", readingMin: 15, durationMin: 150 },
+    { id: "chemistry", name: "Chemistry", readingMin: 15, durationMin: 150 },
+  ];
+
   const DEFAULTS = {
-    examName: "Trial Examination",
-    readingMin: 10,
+    examName: "Trial Exam",
+    readingMin: 15,
     durationMin: 120,
     scheduledStart: "",
     intervalMin: 10,
@@ -86,6 +99,7 @@
     form: $("settings-form"),
     settingsClose: $("settings-close"),
     settingsCancel: $("settings-cancel"),
+    preset: $("preset"),
   };
 
   const ICON_PLAY = "M8 5v14l11-7z";
@@ -227,7 +241,8 @@
     return `${h}:${m}${withSeconds ? ":" + s : ""}${suffix}`;
   }
 
-  const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  // Australian date style, e.g. "Saturday 26 September 2026"
+  const dateFormatter = new Intl.DateTimeFormat("en-AU", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
@@ -685,8 +700,8 @@
     if (settings.reduceMotion) document.documentElement.dataset.motion = "reduced";
     else delete document.documentElement.dataset.motion;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#0b1020";
-    el.examName.textContent = settings.examName || "Trial Examination";
+    if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#120d19";
+    el.examName.textContent = settings.examName || DEFAULTS.examName;
     document.title = `${settings.examName || "Exam"} · Ascent Academia Clock`;
     el.date.hidden = !settings.showDate;
     lastMinuteSr = -1;
@@ -721,15 +736,48 @@
     for (const cb of el.form.querySelectorAll('input[name="warn"]')) {
       cb.checked = settings.warnings.includes(Number(cb.value));
     }
+    f.preset.value = (PRESETS.find((p) => p.name === settings.examName &&
+      p.readingMin === settings.readingMin && p.durationMin === settings.durationMin) || {}).id || "";
     wake();
+    el.dialog.classList.remove("closing");
     if (typeof el.dialog.showModal === "function") el.dialog.showModal();
     else el.dialog.setAttribute("open", "");
-    f.examName.focus();
+    f.preset.focus();
   }
 
+  // Slide the panel out before actually closing it
+  let closingTimer = null;
   function closeSettings() {
-    if (typeof el.dialog.close === "function") el.dialog.close();
-    else el.dialog.removeAttribute("open");
+    if (!el.dialog.open || el.dialog.classList.contains("closing")) return;
+    const finish = () => {
+      clearTimeout(closingTimer);
+      el.dialog.removeEventListener("animationend", onEnd);
+      el.dialog.classList.remove("closing");
+      if (typeof el.dialog.close === "function") el.dialog.close();
+      else el.dialog.removeAttribute("open");
+      el.settingsBtn.focus({ preventScroll: true });
+    };
+    const onEnd = (e) => { if (e.target === el.dialog) finish(); };
+    el.dialog.addEventListener("animationend", onEnd);
+    el.dialog.classList.add("closing");
+    closingTimer = setTimeout(finish, 450); // in case animations are disabled
+  }
+
+  function fillPresetOptions() {
+    for (const p of PRESETS) {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = `${p.name} (${p.readingMin} + ${p.durationMin} min)`;
+      el.preset.appendChild(o);
+    }
+    el.preset.addEventListener("change", () => {
+      const p = PRESETS.find((x) => x.id === el.preset.value);
+      if (!p) return;
+      const f = el.form.elements;
+      f.examName.value = p.name;
+      f.readingMin.value = p.readingMin;
+      f.durationMin.value = p.durationMin;
+    });
   }
 
   const clampInt = (v, lo, hi, fallback) => {
@@ -827,6 +875,8 @@
   el.announce.addEventListener("click", hideAnnouncement);
   // Clicking the dialog backdrop closes it
   el.dialog.addEventListener("click", (e) => { if (e.target === el.dialog) closeSettings(); });
+  // Esc: animate the panel out instead of closing instantly
+  el.dialog.addEventListener("cancel", (e) => { e.preventDefault(); closeSettings(); });
 
   document.addEventListener("fullscreenchange", updateFsButton);
   document.addEventListener("webkitfullscreenchange", updateFsButton);
@@ -877,6 +927,7 @@
   });
 
   // ---------- Boot ----------
+  fillPresetOptions();
   buildClock();
   applySettings();
   updateFsButton();

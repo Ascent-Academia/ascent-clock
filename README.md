@@ -1,11 +1,13 @@
 # Ascent Academia · Exam Clock
 
-A clean, full-screen digital clock (with seconds) for running trial exams.
+A clean, full-screen digital clock (with seconds) for running VCE trial exams at Ascent Academia.
 It is built to be projected on a large TV or 4K projector and works in any modern browser with nothing to install.
 
 ## Features
 
 - **Large, animated clock** (HH:MM:SS). Each digit rolls smoothly when it changes. It scales from a phone up to a 4K screen.
+- **Ascent Academia branding**: the official logo (`brand/`), brand violet `#8c68ac` and the Manrope typeface, bundled so it works offline.
+- **VCE presets**: one click sets the standard reading and writing time for Mathematical Methods, Specialist and General Mathematics (Exams 1 and 2), Physics and Chemistry. All use 15 minutes of reading time.
 - **Exam timing**: optional reading time, then writing time. It shows the start time, time elapsed, time remaining, the finish time and a progress bar.
 - **Time-check announcements**: a full-screen banner such as "10 minutes have passed" appears every 5/10/15/20/30/60 minutes (you choose). Warnings appear at 60/30/15/10/5/1 minutes remaining, plus "Time is up — pens down" at the end. An optional soft chime can play with each one.
 - **Accurate time**
@@ -41,6 +43,6 @@ It is a static site (`index.html`, `styles.css`, `app.js`) with no build step.
 ## Tips for exam rooms
 
 1. Open the clock on the computer connected to the TV or projector and press <kbd>F</kbd>.
-2. Press <kbd>S</kbd> to set the exam title, reading and writing time, and how often to announce.
+2. Press <kbd>S</kbd> to open the settings panel, pick a VCE preset or set the exam title, reading and writing time, and how often to announce.
 3. Press **Start exam** (or <kbd>Space</kbd>) when reading time begins, or set a *Scheduled start*.
 4. Check *Settings → Time accuracy* says the clock is verified.
