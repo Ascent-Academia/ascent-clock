@@ -15,17 +15,17 @@ It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, 
 
 ## On exam day
 
-1. Open the clock on the computer connected to the TV or projector.
-2. Press <kbd>S</kbd> to open the settings panel. Pick a **VCE preset** (or type your own title), and set the times in one of two ways:
-   - **Length**: reading and writing time in minutes. Then press **Start exam** when reading begins, or set a scheduled start.
-   - **Clock time**: when reading starts, when writing starts and when the exam ends (e.g. 9:00 / 9:15 / 11:45). After you save, the clock counts down and starts by itself.
-3. Check **Time accuracy** at the bottom of the panel says the clock is verified.
-4. Press <kbd>F</kbd> for full screen.
-5. If you used **Length**, press **Start exam** (or <kbd>Space</kbd>) when reading time begins.
+1. Open the clock on the computer connected to the TV or projector, and press <kbd>F</kbd> for full screen.
+2. Press **Start exam** (or <kbd>Space</kbd>). A setup panel opens. Nothing starts until you confirm.
+3. Pick a **VCE preset** (or type your own title), then set the times one of two ways:
+   - **Length**: reading and writing time in minutes, plus an optional scheduled start.
+   - **Clock time**: when reading starts, when writing starts and when the exam ends (e.g. 9:00 / 9:15 / 11:45).
 
-Before the exam starts, a line under the date shows the plan, e.g. "15m reading · 2h 30m writing · starts 09:00 · ends 11:45".
+   The box below the times shows the resulting schedule.
+4. Press **Start exam**. If the start is in the future the button says **Schedule exam**, and the clock counts down and starts by itself.
+5. When you're finished, press **Exit exam** to go back to the plain clock.
 
-The controls and mouse cursor fade out after a few seconds, so only the clock is shown. Move the mouse or press a key to bring them back.
+Before an exam starts, the screen shows only the clock and date. The controls and mouse cursor fade out after a few seconds; move the mouse or press a key to bring them back.
 
 ## Features
 
@@ -40,6 +40,7 @@ The controls and mouse cursor fade out after a few seconds, so only the clock is
 - A progress bar marked with the actual clock times (e.g. 9:25, 9:35 … 11:45).
 - **Skip to writing** ends reading time early and starts writing time straight away. While counting down to a scheduled start, the same button reads **Start now**. Both need a second press to confirm.
 - **Pause / resume** for interruptions such as fire drills. The finish time moves forward by the time spent paused.
+- **Exit exam** stops the timer and returns to the plain clock, after a confirmation.
 - Writing time of `0` gives an open-ended timer that just counts up.
 
 ### Announcements
@@ -67,7 +68,7 @@ Check these against the current VCAA exam timetable each year. The presets are s
 ### Accurate time
 - The display updates exactly on the start of each second, and a safety check catches any late update within 0.2 s.
 - Elapsed and remaining times are worked out from the exam's start time, not by counting ticks, so they never drift, even over a three-hour exam.
-- The computer's clock is checked against internet time when the page opens, every 30 minutes, and when you press **Check clock now**. If the computer's clock is wrong by more than a second, the display corrects itself, shows a small note under the date, and explains it in the settings panel.
+- The computer's clock is checked against internet time when the page opens, every 30 minutes, and when you press **Check clock now** (in ⚙ Settings). If the computer's clock is wrong by more than a second, the display corrects itself, shows a small note under the date, and explains it in the settings panel.
 - If there is no internet connection, the clock uses the computer's own time. Make sure the computer's date and time are set automatically.
 
 ### Reliability and accessibility
@@ -81,12 +82,12 @@ Check these against the current VCAA exam timetable each year. The presets are s
 | Key | Action |
 | --- | --- |
 | <kbd>F</kbd> (or double-click the clock) | Full screen on / off |
-| <kbd>Space</kbd> | Start, pause or resume the exam |
-| <kbd>S</kbd> | Open the settings panel |
+| <kbd>Space</kbd> | Start an exam (opens setup), or pause / resume a running one |
+| <kbd>S</kbd> | Open settings (display, announcements, time accuracy) |
 | <kbd>T</kbd> | Switch theme |
 | <kbd>W</kbd>, then <kbd>W</kbd> again | Skip to writing time (or start now during a countdown) |
-| <kbd>R</kbd>, then <kbd>R</kbd> again | Reset the exam |
-| <kbd>Esc</kbd> | Close the banner or the settings panel |
+| <kbd>E</kbd> | Exit the exam (asks to confirm) |
+| <kbd>Esc</kbd> | Close a banner, the settings panel or the exit confirmation |
 
 ## Hosting
 

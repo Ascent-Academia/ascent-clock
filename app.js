@@ -94,13 +94,14 @@
     startIcon: $("start-icon"),
     skipBtn: $("skip-btn"),
     skipLabel: $("skip-label"),
-    plan: $("plan"),
     announceDismiss: $("announce-dismiss"),
     timingSummary: $("timing-summary"),
     timingDuration: $("timing-duration"),
     timingClock: $("timing-clock"),
-    resetBtn: $("reset-btn"),
-    resetLabel: $("reset-label"),
+    exitBtn: $("exit-btn"),
+    exitConfirm: $("exit-confirm"),
+    settingsTitle: $("settings-title"),
+    settingsSave: $("settings-save"),
     themeBtn: $("theme-btn"),
     settingsBtn: $("settings-btn"),
     fsBtn: $("fullscreen-btn"),
@@ -545,11 +546,10 @@
     el.app.classList.toggle("finished", !!st && st.phase === "finished");
     el.panel.hidden = !st;
     el.phasePill.hidden = !st;
-    el.resetBtn.hidden = !exam;
+    el.exitBtn.hidden = !exam;
 
     updateStartButton(st);
     updateSkipButton(st);
-    renderPlan(nowMs);
 
     if (!st) {
       lastE = null;
@@ -646,29 +646,10 @@
     if (!skipArmed) el.skipLabel.textContent = phase === "reading" ? "Skip to writing" : "Start now";
   }
 
-  // Before an exam starts, show the plan under the date
-  function renderPlan(nowMs) {
-    el.plan.hidden = !!exam;
-    if (exam) return;
-    const R = settings.readingMin, D = settings.durationMin;
-    const parts = [];
-    if (R) parts.push(`${formatShortMinutes(R)} reading`);
-    parts.push(D ? `${formatShortMinutes(D)} writing` : "no set end");
-    const start = scheduledStartMs();
-    if (start) {
-      parts.push(`starts ${formatClockTime(new Date(start))}`);
-      if (D) parts.push(`ends ${formatClockTime(new Date(start + (R + D) * MIN))}`);
-    } else if (D) {
-      parts.push(`ends ${formatClockTime(new Date(nowMs + (R + D) * MIN))} if started now`);
-    }
-    const text = parts.join(" · ");
-    if (el.plan.textContent !== text) el.plan.textContent = text;
-  }
-
   function updateStartButton(st) {
     el.startBtn.hidden = !!st && st.phase === "upcoming" && !st.paused;
     if (!exam) {
-      el.startLabel.textContent = settings.scheduledStart ? `Start at ${settings.scheduledStart}` : "Start exam";
+      el.startLabel.textContent = "Start exam";
       el.startIcon.setAttribute("d", ICON_PLAY);
     } else if (st && st.phase === "finished") {
       el.startLabel.textContent = "New exam";
@@ -695,9 +676,9 @@
     if (exam) store.set(STORAGE_EXAM, exam); else store.remove(STORAGE_EXAM);
   }
 
-  function scheduledStartMs() {
-    if (!settings.scheduledStart) return null;
-    const [h, m] = settings.scheduledStart.split(":").map(Number);
+  function scheduledStartMs(hhmm = settings.scheduledStart) {
+    if (!hhmm) return null;
+    const [h, m] = hhmm.split(":").map(Number);
     const d = new Date(now());
     d.setHours(h, m, 0, 0);
     // If that time already passed more than 6 hours ago, assume tomorrow
@@ -705,17 +686,28 @@
     return d.getTime();
   }
 
+  /** Start the exam configured in settings: now, or at its scheduled time. */
+  function beginExam() {
+    const t = now();
+    exam = { startAt: scheduledStartMs() ?? t, pausedAt: null, pausedTotal: 0 };
+    const e = examElapsed(t);
+    // Announce the start if it's happening now; don't replay announcements
+    // when joining a clock-time exam that is already under way.
+    lastE = e < 0 ? null : e < 5000 ? -1 : e;
+    saveExam();
+    buildProgressMarks();
+    requestWakeLock();
+    if (settings.sound) chime(1); // also unlocks audio on first user gesture
+    render(false);
+  }
+
   function startOrPause() {
     const t = now();
     const st = examState(t);
     if (!exam || (st && st.phase === "finished")) {
-      const scheduled = exam ? null : scheduledStartMs();
-      exam = { startAt: scheduled ?? t, pausedAt: null, pausedTotal: 0 };
-      // Seed so the "reading/writing has begun" announcement fires right away
-      lastE = examElapsed(t) >= 0 ? -1 : null;
-      buildProgressMarks();
-      requestWakeLock();
-      if (settings.sound) chime(1); // also unlocks audio on first user gesture
+      // Starting an exam goes through the setup panel first
+      openSettings("start");
+      return;
     } else if (exam.pausedAt) {
       exam.pausedTotal += t - exam.pausedAt;
       exam.pausedAt = null;
@@ -760,35 +752,26 @@
     render(false);
   }
 
-  // Resetting a running exam needs a second press within a few seconds
-  // (browser confirm() dialogs are blocked in some embedded viewers).
-  let resetArmed = null;
-
-  function disarmReset() {
-    clearTimeout(resetArmed);
-    resetArmed = null;
-    el.resetBtn.classList.remove("btn-danger");
-    el.resetLabel.textContent = "Reset";
-  }
-
-  function resetExam() {
+  // Exiting a running exam asks for confirmation first (an in-page dialog,
+  // since browser confirm() pop-ups are blocked in some embedded viewers).
+  function requestExit() {
     if (!exam) return;
     const st = examState(now());
-    if (st && st.phase !== "finished" && !resetArmed) {
-      resetArmed = setTimeout(disarmReset, 5000);
-      el.resetBtn.classList.add("btn-danger");
-      el.resetLabel.textContent = "Press again to reset";
-      el.live.textContent = "Press reset again to confirm";
-      wake();
-      return;
-    }
-    disarmReset();
+    if (!st || st.phase === "finished") { exitExam(); return; }
+    if (el.exitConfirm.open) return;
+    el.exitConfirm.returnValue = "";
+    wake();
+    if (typeof el.exitConfirm.showModal === "function") el.exitConfirm.showModal();
+    else el.exitConfirm.setAttribute("open", "");
+  }
+
+  function exitExam() {
     exam = null;
     saveExam();
     hideAnnouncement();
     buildProgressMarks();
     render(false);
-    el.live.textContent = "Exam timer reset";
+    el.live.textContent = "Exam ended. Showing the clock.";
   }
 
   // ---------- Theme / motion / display ----------
@@ -817,7 +800,13 @@
   }
 
   // ---------- Settings dialog ----------
-  function openSettings() {
+  let settingsMode = "settings";
+
+  /** mode "start": set up and start an exam. mode "settings": everything. */
+  function openSettings(mode = "settings") {
+    settingsMode = mode === "start" ? "start" : "settings";
+    el.dialog.classList.toggle("start-mode", settingsMode === "start");
+    el.settingsTitle.textContent = settingsMode === "start" ? "Start an exam" : "Settings";
     const f = el.form.elements;
     f.examName.value = settings.examName;
     f.readingMin.value = settings.readingMin;
@@ -847,6 +836,20 @@
     f.preset.focus();
   }
 
+  // In start mode the main button says what will happen
+  function updateSaveLabel() {
+    if (settingsMode !== "start") { el.settingsSave.textContent = "Save"; return; }
+    const f = el.form.elements;
+    let later = false;
+    if (f.timingMode.value === "clock") {
+      const r = readClockTimes(f);
+      later = !r.error && scheduledStartMs(r.start) > now();
+    } else if (f.scheduledStart.value) {
+      later = scheduledStartMs(f.scheduledStart.value) > now();
+    }
+    el.settingsSave.textContent = later ? "Schedule exam" : "Start exam";
+  }
+
   // Slide the panel out before actually closing it
   let closingTimer = null;
   function closeSettings() {
@@ -857,7 +860,9 @@
       el.dialog.classList.remove("closing");
       if (typeof el.dialog.close === "function") el.dialog.close();
       else el.dialog.removeAttribute("open");
-      el.settingsBtn.focus({ preventScroll: true });
+      // Return focus to the button that matches what the panel was for, so
+      // Space then pauses a just-started exam rather than reopening settings
+      (settingsMode === "start" ? el.startBtn : el.settingsBtn).focus({ preventScroll: true });
     };
     const onEnd = (e) => { if (e.target === el.dialog) finish(); };
     el.dialog.addEventListener("animationend", onEnd);
@@ -920,10 +925,12 @@
           `Writing ${hmLabel(minToHm(st + R))}–${hmLabel(minToHm(st + R + D))}`;
       } else {
         text = (R ? `${formatShortMinutes(R)} reading + ` : "") + (D ? `${formatShortMinutes(D)} writing` : "writing with no set end");
+        if (D && settingsMode === "start") text += ` · ends ${formatClockTime(new Date(now() + (R + D) * MIN))} if started now`;
       }
     }
     el.timingSummary.textContent = text;
     el.timingSummary.classList.toggle("is-error", error);
+    updateSaveLabel();
   }
 
   // Switching modes carries the current times across
@@ -1026,22 +1033,20 @@
       settings.scheduledStart = clockTimes.start;
       const changed = prev.timingMode !== "clock" || prev.scheduledStart !== settings.scheduledStart ||
         prev.readingMin !== settings.readingMin || prev.durationMin !== settings.durationMin;
+      // A running clock-time exam follows edited times
       const st = exam && examState(now());
-      if (!exam || st.phase === "finished") {
-        // Arm the exam: it counts down to reading time and runs by itself
-        exam = { startAt: scheduledStartMs(), pausedAt: null, pausedTotal: 0 };
-        requestWakeLock();
-      } else if (changed) {
+      if (st && st.phase !== "finished" && changed && settingsMode !== "start") {
         exam.startAt = scheduledStartMs();
+        saveExam();
       }
-      saveExam();
     }
     store.set(STORAGE_SETTINGS, settings);
     // Don't replay announcements that are now "in the past" because of changed durations
     lastE = exam ? examElapsed(now()) : null;
     applySettings();
     closeSettings();
-    if (settings.sound) chime(1);
+    if (settingsMode === "start") beginExam();
+    else if (settings.sound) chime(1);
   }
 
   // ---------- Full screen ----------
@@ -1098,11 +1103,14 @@
 
   // ---------- Events ----------
   el.startBtn.addEventListener("click", startOrPause);
-  el.resetBtn.addEventListener("click", resetExam);
+  el.exitBtn.addEventListener("click", requestExit);
+  el.exitConfirm.addEventListener("close", () => {
+    if (el.exitConfirm.returnValue === "exit") exitExam();
+  });
   el.skipBtn.addEventListener("click", skipAhead);
   el.announceDismiss.addEventListener("click", (e) => { e.stopPropagation(); hideAnnouncement(); });
   el.themeBtn.addEventListener("click", cycleTheme);
-  el.settingsBtn.addEventListener("click", openSettings);
+  el.settingsBtn.addEventListener("click", () => openSettings("settings"));
   el.fsBtn.addEventListener("click", toggleFullscreen);
   el.form.addEventListener("submit", saveSettings);
   el.settingsClose.addEventListener("click", closeSettings);
@@ -1123,15 +1131,16 @@
   $("stage").addEventListener("dblclick", toggleFullscreen);
 
   document.addEventListener("keydown", (e) => {
-    if (el.dialog.open || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (el.dialog.open || el.exitConfirm.open || e.ctrlKey || e.metaKey || e.altKey) return;
     const tag = (e.target.tagName || "").toLowerCase();
     if (["input", "select", "textarea"].includes(tag)) return;
     const onButton = tag === "button";
     switch (e.key.toLowerCase()) {
       case "f": toggleFullscreen(); break;
-      case "s": e.preventDefault(); openSettings(); break;
+      case "s": e.preventDefault(); openSettings("settings"); break;
       case "t": cycleTheme(); break;
-      case "r": resetExam(); break;
+      case "e":
+      case "r": requestExit(); break;
       case "w": skipAhead(); break;
       case " ":
         if (onButton) return; // let the focused button handle Space

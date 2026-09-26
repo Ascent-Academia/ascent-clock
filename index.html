@@ -38,9 +38,9 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
           <span id="skip-label">Skip to writing</span>
         </button>
-        <button type="button" class="btn" id="reset-btn" aria-keyshortcuts="R" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
-          <span id="reset-label">Reset</span>
+        <button type="button" class="btn" id="exit-btn" aria-keyshortcuts="E" aria-haspopup="dialog" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.1 15.6 11.5 17l5-5-5-5-1.4 1.4 2.6 2.6H3v2h9.7l-2.6 2.6zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg>
+          <span>Exit exam</span>
         </button>
         <button type="button" class="btn icon-btn" id="theme-btn" aria-keyshortcuts="T" title="Change theme (T)">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18V3z"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
@@ -72,7 +72,6 @@
       <p class="sr-only" id="clock-sr" aria-live="off"></p>
 
       <p class="date" id="date"></p>
-      <p class="plan" id="plan" hidden></p>
       <p class="sync-badge" id="sync-badge" hidden>Time corrected to internet time</p>
     </main>
 
@@ -120,7 +119,7 @@
     <div class="sr-only" id="live" role="status" aria-live="assertive" aria-atomic="true"></div>
 
     <div class="shortcut-hint" id="shortcut-hint" aria-hidden="true">
-      <kbd>F</kbd> full screen · <kbd>Space</kbd> start / pause · <kbd>S</kbd> settings · <kbd>T</kbd> theme
+      <kbd>F</kbd> full screen · <kbd>Space</kbd> start exam · <kbd>S</kbd> settings · <kbd>T</kbd> theme
     </div>
   </div>
 
@@ -187,7 +186,7 @@
               <input type="time" name="endTime">
             </label>
           </div>
-          <p class="field-note">The clock counts down to reading time and runs by itself once you save.</p>
+          <p class="field-note">After you press Start exam, the clock counts down to reading time and runs by itself.</p>
         </div>
 
         <p class="timing-summary" id="timing-summary" aria-live="polite"></p>
@@ -233,7 +232,7 @@
         </label>
       </fieldset>
 
-      <fieldset>
+      <fieldset data-section="settings-only">
         <legend>Display</legend>
         <div class="field-row">
           <label class="field">
@@ -262,7 +261,7 @@
         </label>
       </fieldset>
 
-      <fieldset>
+      <fieldset data-section="settings-only">
         <legend>Time accuracy</legend>
         <p class="sync-status" id="sync-status" role="status">Not checked yet.</p>
         <div>
@@ -275,6 +274,18 @@
         <button type="button" class="btn" id="settings-cancel">Cancel</button>
         <button type="submit" class="btn btn-primary" id="settings-save">Save</button>
       </footer>
+    </form>
+  </dialog>
+
+  <!-- Exit exam confirmation -->
+  <dialog class="confirm" id="exit-confirm" aria-labelledby="exit-title" aria-describedby="exit-desc">
+    <form method="dialog">
+      <h2 id="exit-title">Exit this exam?</h2>
+      <p id="exit-desc">The exam timer stops and the screen goes back to the clock. This can't be undone.</p>
+      <div class="confirm-actions">
+        <button type="submit" class="btn" value="cancel" autofocus>Keep exam running</button>
+        <button type="submit" class="btn btn-danger" value="exit">Exit exam</button>
+      </div>
     </form>
   </dialog>
 

@@ -417,15 +417,6 @@ body {
 }
 .date[hidden] { display: none; }
 
-.plan {
-  margin: 0;
-  font-size: clamp(14px, 2.4vmin, 64px);
-  font-weight: 600;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
 .sync-badge {
   margin: 0;
   font-size: clamp(11px, 1.4vmin, 36px);
@@ -891,6 +882,33 @@ kbd {
   border-top: 1px solid var(--border);
 }
 .settings-foot .btn { font-size: 1em; }
+
+/* Start mode shows only what's needed to set up an exam */
+.settings.start-mode [data-section="settings-only"] { display: none; }
+
+/* ---------- Exit exam confirmation ---------- */
+
+.confirm {
+  width: min(460px, calc(100vw - 32px));
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--fg);
+  background: var(--bg-2);
+  box-shadow: var(--shadow);
+  font-size: 16px;
+}
+.confirm[open] { animation: confirm-in .35s var(--ease-out); }
+.confirm::backdrop { background: rgba(10, 6, 16, .55); }
+@keyframes confirm-in {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+.confirm h2 { margin: 0 0 8px; font-size: 1.35em; font-weight: 800; }
+.confirm p { margin: 0 0 22px; color: var(--fg-muted); line-height: 1.5; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.confirm-actions .btn { font-size: 1em; }
+@media (min-width: 2400px) { .confirm { font-size: 24px; width: min(680px, calc(100vw - 32px)); } }
 
 .noscript {
   position: fixed; inset: 0;
