@@ -16,10 +16,14 @@ It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, 
 ## On exam day
 
 1. Open the clock on the computer connected to the TV or projector.
-2. Press <kbd>S</kbd> to open the settings panel. Pick a **VCE preset** (or type your own title and times), then **Save**.
+2. Press <kbd>S</kbd> to open the settings panel. Pick a **VCE preset** (or type your own title), and set the times in one of two ways:
+   - **Length**: reading and writing time in minutes. Then press **Start exam** when reading begins, or set a scheduled start.
+   - **Clock time**: when reading starts, when writing starts and when the exam ends (e.g. 9:00 / 9:15 / 11:45). After you save, the clock counts down and starts by itself.
 3. Check **Time accuracy** at the bottom of the panel says the clock is verified.
 4. Press <kbd>F</kbd> for full screen.
-5. Press **Start exam** (or <kbd>Space</kbd>) when reading time begins. You can also set a **Scheduled start** time and the clock starts itself.
+5. If you used **Length**, press **Start exam** (or <kbd>Space</kbd>) when reading time begins.
+
+Before the exam starts, a line under the date shows the plan, e.g. "15m reading · 2h 30m writing · starts 09:00 · ends 11:45".
 
 The controls and mouse cursor fade out after a few seconds, so only the clock is shown. Move the mouse or press a key to bring them back.
 
@@ -31,15 +35,18 @@ The controls and mouse cursor fade out after a few seconds, so only the clock is
 - Three themes: **Midnight** (dark, the default for projectors), **Daylight** (for bright rooms) and **High contrast** (black and white, for maximum legibility).
 
 ### Exam timing
-- Optional **reading time**, then **writing time**. The panel below the clock shows when writing began, time elapsed, time remaining and the finish time.
-- A progress bar with a tick at every announcement interval.
+- Optional **reading time**, then **writing time**, set either as lengths or as clock times (reading starts / writing starts / exam ends).
+- The panel below the clock shows when writing began, time elapsed, time remaining and the finish time.
+- A progress bar marked with the actual clock times (e.g. 9:25, 9:35 … 11:45).
+- **Skip to writing** ends reading time early and starts writing time straight away. While counting down to a scheduled start, the same button reads **Start now**. Both need a second press to confirm.
 - **Pause / resume** for interruptions such as fire drills. The finish time moves forward by the time spent paused.
 - Writing time of `0` gives an open-ended timer that just counts up.
 
 ### Announcements
 - A large banner appears across the screen at regular intervals (every 5, 10, 15, 20, 30 or 60 minutes), for example "30 minutes have passed · 1 hour 30 minutes remaining".
 - Warnings when 60, 30, 15, 10, 5 or 1 minutes remain (choose any combination).
-- Banners also mark the start of reading time, the start of writing time, and "Time is up — please put your pens down" at the end.
+- Short banners mark the start of reading time and writing time (they close after 5 seconds), and "Time is up — please put your pens down" shows at the end.
+- Close any banner early with **Dismiss**, a tap or click anywhere on it, or <kbd>Esc</kbd>.
 - An optional soft chime can play with each announcement. It is off by default.
 
 ### VCE presets
@@ -77,6 +84,7 @@ Check these against the current VCAA exam timetable each year. The presets are s
 | <kbd>Space</kbd> | Start, pause or resume the exam |
 | <kbd>S</kbd> | Open the settings panel |
 | <kbd>T</kbd> | Switch theme |
+| <kbd>W</kbd>, then <kbd>W</kbd> again | Skip to writing time (or start now during a countdown) |
 | <kbd>R</kbd>, then <kbd>R</kbd> again | Reset the exam |
 | <kbd>Esc</kbd> | Close the banner or the settings panel |
 
@@ -99,7 +107,7 @@ To run it on your own computer instead:
 | `sw.js` | Offline support. Increase `CACHE` (e.g. `ascent-clock-v3`) whenever you change a file, so browsers pick up the new version |
 | `brand/` | Official Ascent Academia logo files (brand violet `#8c68ac`) |
 | `fonts/` | Manrope typeface, stored locally so the clock works offline |
-| `icon.svg`, `manifest.webmanifest` | Browser tab icon and install-as-app details |
+| `icon.svg`, `favicon-*.png`, `apple-touch-icon.png`, `icon-*.png`, `icon-app.svg`, `manifest.webmanifest` | Browser tab icons, home-screen / installed-app icons and install-as-app details |
 
 There is no build step. Edit the files and push.
 

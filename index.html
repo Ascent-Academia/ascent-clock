@@ -7,8 +7,10 @@
   <link rel="preload" href="fonts/manrope-latin-var.woff2" as="font" type="font/woff2" crossorigin>
   <meta name="description" content="A clean, full-screen exam clock for Ascent Academia trial exams. Shows the time, reading and writing time, elapsed-time milestones and time remaining.">
   <meta name="theme-color" content="#120d19">
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="favicon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -31,6 +33,10 @@
         <button type="button" class="btn btn-primary" id="start-btn" aria-keyshortcuts="Space">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path id="start-icon" d="M8 5v14l11-7z"/></svg>
           <span id="start-label">Start exam</span>
+        </button>
+        <button type="button" class="btn" id="skip-btn" aria-keyshortcuts="W" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+          <span id="skip-label">Skip to writing</span>
         </button>
         <button type="button" class="btn" id="reset-btn" aria-keyshortcuts="R" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
@@ -66,6 +72,7 @@
       <p class="sr-only" id="clock-sr" aria-live="off"></p>
 
       <p class="date" id="date"></p>
+      <p class="plan" id="plan" hidden></p>
       <p class="sync-badge" id="sync-badge" hidden>Time corrected to internet time</p>
     </main>
 
@@ -100,12 +107,13 @@
     </section>
 
     <!-- Milestone announcement banner -->
-    <div class="announce" id="announce" aria-hidden="true">
+    <div class="announce" id="announce">
       <div class="announce-card">
         <div class="announce-ring" aria-hidden="true"></div>
-        <div class="announce-kicker" id="announce-kicker">Milestone</div>
-        <div class="announce-title" id="announce-title">10 minutes have passed</div>
-        <div class="announce-sub" id="announce-sub"></div>
+        <div class="announce-kicker" id="announce-kicker" aria-hidden="true">Milestone</div>
+        <div class="announce-title" id="announce-title" aria-hidden="true">10 minutes have passed</div>
+        <div class="announce-sub" id="announce-sub" aria-hidden="true"></div>
+        <button type="button" class="announce-dismiss" id="announce-dismiss" tabindex="-1">Dismiss <kbd>Esc</kbd></button>
       </div>
     </div>
     <!-- Live region for assistive tech -->
@@ -139,20 +147,50 @@
           <span>Exam title</span>
           <input type="text" name="examName" maxlength="80" placeholder="e.g. Mathematical Methods — Exam 2">
         </label>
-        <div class="field-row">
+        <div class="field">
+          <span id="timing-mode-label">Set the exam times by</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="timing-mode-label">
+            <label><input type="radio" name="timingMode" value="duration"><span>Length</span></label>
+            <label><input type="radio" name="timingMode" value="clock"><span>Clock time</span></label>
+          </div>
+        </div>
+
+        <div class="timing-group" id="timing-duration">
+          <div class="field-row">
+            <label class="field">
+              <span>Reading time <small>(minutes)</small></span>
+              <input type="number" name="readingMin" min="0" max="60" step="1" inputmode="numeric">
+            </label>
+            <label class="field">
+              <span>Writing time <small>(minutes, 0 = no end)</small></span>
+              <input type="number" name="durationMin" min="0" max="600" step="1" inputmode="numeric">
+            </label>
+          </div>
           <label class="field">
-            <span>Reading time <small>(minutes)</small></span>
-            <input type="number" name="readingMin" min="0" max="60" step="1" inputmode="numeric">
-          </label>
-          <label class="field">
-            <span>Writing time <small>(minutes, 0 = no end)</small></span>
-            <input type="number" name="durationMin" min="0" max="600" step="1" inputmode="numeric">
+            <span>Scheduled start <small>(optional, or start with the button)</small></span>
+            <input type="time" name="scheduledStart">
           </label>
         </div>
-        <label class="field">
-          <span>Scheduled start <small>(optional — leave blank to start with the button)</small></span>
-          <input type="time" name="scheduledStart">
-        </label>
+
+        <div class="timing-group" id="timing-clock" hidden>
+          <div class="field-row field-row-3">
+            <label class="field">
+              <span>Reading starts</span>
+              <input type="time" name="readingStart">
+            </label>
+            <label class="field">
+              <span>Writing starts</span>
+              <input type="time" name="writingStart">
+            </label>
+            <label class="field">
+              <span>Exam ends</span>
+              <input type="time" name="endTime">
+            </label>
+          </div>
+          <p class="field-note">The clock counts down to reading time and runs by itself once you save.</p>
+        </div>
+
+        <p class="timing-summary" id="timing-summary" aria-live="polite"></p>
       </fieldset>
 
       <fieldset>
