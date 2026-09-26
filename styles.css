@@ -4,59 +4,78 @@
    laptop screen up to a 4K projector / TV.
    ========================================================================== */
 
+/* Manrope (SIL Open Font License), bundled so the clock works offline */
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("fonts/manrope-latin-var.woff2") format("woff2");
+}
+
+/* ---------- Brand ----------
+   Ascent Academia violet, taken from the official logo files in brand/. */
 :root {
-  --font: "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, system-ui, sans-serif;
+  --brand: #8c68ac;
+  --brand-light: #b597d3;
+  --brand-lighter: #d9c8ea;
+  --brand-deep: #5b3f78;
+
+  --font: "Manrope", "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --ease-in-out: cubic-bezier(.65, 0, .35, 1);
   --radius: clamp(10px, 1.1vmin, 28px);
   --gutter: clamp(16px, 3vmin, 96px);
 }
 
-/* Midnight (default) */
+/* Midnight (default): deep aubergine, built for projectors */
 :root,
 [data-clock-theme="dark"] {
-  --bg: #0b1020;
-  --bg-2: #121a33;
-  --glow-1: rgba(56, 189, 248, .16);
-  --glow-2: rgba(168, 85, 247, .12);
-  --fg: #f3f6ff;
-  --fg-muted: #9aa6c7;
-  --accent: #5eead4;
-  --accent-2: #38bdf8;
-  --accent-fg: #06201c;
-  --reading: #fbbf24;
-  --warn: #fb923c;
-  --danger: #f87171;
+  --bg: #120d19;
+  --bg-2: #1c1526;
+  --glow-1: rgba(140, 104, 172, .26);
+  --glow-2: rgba(91, 63, 120, .30);
+  --fg: #f6f2fb;
+  --fg-muted: #b3a6c4;
+  --logo: #ffffff;
+  --accent: var(--brand-light);
+  --accent-2: var(--brand);
+  --accent-fg: #170f20;
+  --reading: #f2b766;
+  --warn: #f59a5b;
+  --danger: #f2727a;
   --surface: rgba(255, 255, 255, .06);
-  --surface-2: rgba(255, 255, 255, .10);
-  --border: rgba(255, 255, 255, .14);
-  --track: rgba(255, 255, 255, .10);
-  --shadow: 0 30px 80px rgba(0, 0, 0, .45);
+  --surface-2: rgba(255, 255, 255, .11);
+  --border: rgba(217, 200, 234, .16);
+  --track: rgba(255, 255, 255, .09);
+  --shadow: 0 30px 80px rgba(0, 0, 0, .5);
   color-scheme: dark;
 }
 
+/* Daylight: for bright rooms and front projectors */
 [data-clock-theme="light"] {
-  --bg: #f6f7fb;
-  --bg-2: #e9edf7;
-  --glow-1: rgba(14, 165, 233, .14);
-  --glow-2: rgba(124, 58, 237, .10);
-  --fg: #0b1224;
-  --fg-muted: #4b5675;
-  --accent: #0f766e;
-  --accent-2: #0369a1;
+  --bg: #f8f5fb;
+  --bg-2: #efe8f5;
+  --glow-1: rgba(140, 104, 172, .18);
+  --glow-2: rgba(181, 151, 211, .22);
+  --fg: #1b1224;
+  --fg-muted: #5e5070;
+  --logo: var(--brand);
+  --accent: #74529a;
+  --accent-2: var(--brand);
   --accent-fg: #ffffff;
-  --reading: #b45309;
-  --warn: #c2410c;
-  --danger: #b91c1c;
-  --surface: rgba(11, 18, 36, .05);
-  --surface-2: rgba(11, 18, 36, .09);
-  --border: rgba(11, 18, 36, .16);
-  --track: rgba(11, 18, 36, .10);
-  --shadow: 0 30px 80px rgba(11, 18, 36, .18);
+  --reading: #a55a06;
+  --warn: #bf4d0c;
+  --danger: #b4232f;
+  --surface: rgba(91, 63, 120, .06);
+  --surface-2: rgba(91, 63, 120, .11);
+  --border: rgba(91, 63, 120, .20);
+  --track: rgba(91, 63, 120, .12);
+  --shadow: 0 30px 80px rgba(60, 35, 90, .18);
   color-scheme: light;
 }
 
+/* High contrast: maximum legibility from the back of the room */
 [data-clock-theme="contrast"] {
   --bg: #000000;
   --bg-2: #000000;
@@ -64,16 +83,17 @@
   --glow-2: transparent;
   --fg: #ffffff;
   --fg-muted: #ffffff;
-  --accent: #ffea00;
-  --accent-2: #ffea00;
+  --logo: #ffffff;
+  --accent: #e2d0f7;
+  --accent-2: #e2d0f7;
   --accent-fg: #000000;
   --reading: #00e5ff;
   --warn: #ffea00;
-  --danger: #ff5252;
+  --danger: #ff5c5c;
   --surface: #000000;
   --surface-2: #1a1a1a;
   --border: #ffffff;
-  --track: #333333;
+  --track: #3a3a3a;
   --shadow: none;
   color-scheme: dark;
 }
@@ -165,10 +185,21 @@ body {
   min-width: 0;
 }
 
-.brand-mark {
-  width: clamp(36px, 6vmin, 160px);
-  height: clamp(36px, 6vmin, 160px);
-  color: var(--accent);
+.brand-logo {
+  display: block;
+  height: clamp(40px, 7vmin, 190px);
+  width: auto;
+  color: var(--logo);
+  flex: none;
+  transition: color .6s var(--ease-in-out);
+}
+
+.brand-divider {
+  align-self: stretch;
+  width: 2px;
+  margin-block: .6vmin;
+  border-radius: 2px;
+  background: var(--border);
   flex: none;
 }
 
@@ -179,17 +210,18 @@ body {
   line-height: 1.15;
 }
 
-.brand-name {
-  font-size: clamp(12px, 1.7vmin, 44px);
-  font-weight: 600;
+.brand-kicker {
+  font-size: clamp(11px, 1.5vmin, 40px);
+  font-weight: 700;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--fg-muted);
+  color: var(--accent);
 }
 
 .exam-name {
   font-size: clamp(18px, 3.4vmin, 92px);
-  font-weight: 650;
+  font-weight: 700;
+  letter-spacing: -.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -311,7 +343,7 @@ body {
   display: flex;
   align-items: center;
   font-size: var(--clock-size);
-  font-weight: 500;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
   letter-spacing: -.02em;
@@ -635,42 +667,75 @@ kbd {
   background: var(--surface);
 }
 
-/* ---------- Settings dialog ---------- */
+/* ---------- Settings side panel ---------- */
 
 .settings {
-  width: min(680px, calc(100vw - 32px));
-  max-height: calc(100dvh - 32px);
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(480px, 100vw);
+  max-width: 100vw;
+  height: 100%;
+  max-height: 100%;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 22px 0 0 22px;
   color: var(--fg);
   background: var(--bg-2);
   box-shadow: var(--shadow);
   font-size: 16px;
+  overflow: hidden;
 }
-.settings[open] { animation: dialog-in .45s var(--ease-out); }
+.settings[open] { animation: panel-slide-in .5s var(--ease-out); }
+.settings.closing { animation: panel-slide-out .32s var(--ease-in-out) forwards; }
 .settings::backdrop {
-  background: rgba(0, 0, 0, .55);
-  backdrop-filter: blur(4px);
+  /* Light scrim so the clock stays readable while settings are open */
+  background: rgba(10, 6, 16, .35);
+  animation: scrim-in .4s var(--ease-out);
 }
-@keyframes dialog-in {
-  from { opacity: 0; transform: translateY(16px) scale(.98); }
-  to   { opacity: 1; transform: none; }
+.settings.closing::backdrop { animation: scrim-out .32s var(--ease-in-out) forwards; }
+
+@keyframes panel-slide-in {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
+@keyframes panel-slide-out {
+  from { transform: none; }
+  to   { transform: translateX(100%); }
+}
+@keyframes scrim-in  { from { opacity: 0; } }
+@keyframes scrim-out { to { opacity: 0; } }
+
+@media (max-width: 520px) {
+  .settings { border-radius: 0; border-left: 0; }
 }
 
 @media (min-width: 2400px) {
-  .settings { font-size: 24px; width: min(1000px, calc(100vw - 32px)); }
+  .settings { font-size: 24px; width: min(760px, 100vw); }
 }
 
-.settings form { display: flex; flex-direction: column; }
+.settings form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 
 .settings-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px 8px;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
 }
-.settings-head h2 { margin: 0; font-size: 1.4em; }
+.settings-head h2 { margin: 0; font-size: 1.35em; font-weight: 800; }
 .settings-head .btn { font-size: 1em; }
 
 .settings fieldset {
@@ -682,7 +747,7 @@ kbd {
   flex-direction: column;
   gap: 14px;
 }
-.settings fieldset:first-of-type { border-top: 0; }
+.settings fieldset:first-child { border-top: 0; }
 .settings legend {
   float: left;
   width: 100%;
