@@ -76,6 +76,7 @@
     startLabel: $("start-label"),
     startIcon: $("start-icon"),
     resetBtn: $("reset-btn"),
+    resetLabel: $("reset-label"),
     themeBtn: $("theme-btn"),
     settingsBtn: $("settings-btn"),
     fsBtn: $("fullscreen-btn"),
@@ -647,10 +648,29 @@
     render(false);
   }
 
+  // Resetting a running exam needs a second press within a few seconds
+  // (browser confirm() dialogs are blocked in some embedded viewers).
+  let resetArmed = null;
+
+  function disarmReset() {
+    clearTimeout(resetArmed);
+    resetArmed = null;
+    el.resetBtn.classList.remove("btn-danger");
+    el.resetLabel.textContent = "Reset";
+  }
+
   function resetExam() {
     if (!exam) return;
     const st = examState(now());
-    if (st && st.phase !== "finished" && !confirm("Reset the exam timer? This cannot be undone.")) return;
+    if (st && st.phase !== "finished" && !resetArmed) {
+      resetArmed = setTimeout(disarmReset, 5000);
+      el.resetBtn.classList.add("btn-danger");
+      el.resetLabel.textContent = "Press again to reset";
+      el.live.textContent = "Press reset again to confirm";
+      wake();
+      return;
+    }
+    disarmReset();
     exam = null;
     saveExam();
     hideAnnouncement();
@@ -661,7 +681,7 @@
 
   // ---------- Theme / motion / display ----------
   function applySettings() {
-    document.documentElement.dataset.theme = settings.theme;
+    document.documentElement.dataset.clockTheme = settings.theme;
     if (settings.reduceMotion) document.documentElement.dataset.motion = "reduced";
     else delete document.documentElement.dataset.motion;
     const meta = document.querySelector('meta[name="theme-color"]');

@@ -15,7 +15,7 @@
 
 /* Midnight (default) */
 :root,
-[data-theme="dark"] {
+[data-clock-theme="dark"] {
   --bg: #0b1020;
   --bg-2: #121a33;
   --glow-1: rgba(56, 189, 248, .16);
@@ -36,7 +36,7 @@
   color-scheme: dark;
 }
 
-[data-theme="light"] {
+[data-clock-theme="light"] {
   --bg: #f6f7fb;
   --bg-2: #e9edf7;
   --glow-1: rgba(14, 165, 233, .14);
@@ -57,7 +57,7 @@
   color-scheme: light;
 }
 
-[data-theme="contrast"] {
+[data-clock-theme="contrast"] {
   --bg: #000000;
   --bg-2: #000000;
   --glow-1: transparent;
@@ -119,8 +119,7 @@ body {
 
 .app {
   position: relative;
-  height: 100vh;
-  height: 100dvh;
+  height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
   padding: var(--gutter);
@@ -241,6 +240,13 @@ body {
   border-color: transparent;
 }
 .btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+
+.btn-danger,
+.btn-danger:hover {
+  background: var(--danger);
+  color: var(--bg);
+  border-color: transparent;
+}
 
 .icon-btn { padding: .7em; }
 
