@@ -72,7 +72,7 @@ Check these against the current VCAA exam timetable each year. The presets are s
 - If there is no internet connection, the clock uses the computer's own time. Make sure the computer's date and time are set automatically.
 
 ### Reliability and accessibility
-- **Survives a refresh:** a running exam is saved in the browser and picks up where it left off. Two windows on the same computer (e.g. a laptop screen and a TV) stay in sync.
+- **Refresh for a clean start:** refreshing the page clears any running exam and resets the exam setup. Display and announcement preferences (theme, 12/24-hour, date, reduce motion, chime, announcement interval and warnings) are remembered.
 - **Works offline** once it has been opened, so a Wi-Fi drop mid-exam doesn't matter.
 - **Keeps the screen awake** while an exam is running or the clock is in full screen, where the browser supports it.
 - Full keyboard control, screen-reader announcements for each time check, and a **Reduce motion** option (it also follows the computer's accessibility setting).

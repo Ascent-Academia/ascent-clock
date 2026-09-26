@@ -54,10 +54,29 @@
     },
   };
 
-  let settings = { ...DEFAULTS, ...(store.get(STORAGE_SETTINGS) || {}) };
+  // Only display and announcement preferences are remembered between visits.
+  // Exam details and any running exam start fresh on every page load.
+  const PREF_KEYS = ["intervalMin", "warnings", "bannerSec", "sound", "hour12", "theme", "showDate", "reduceMotion"];
 
-  // exam: { startAt: ms, pausedAt: ms|null, pausedTotal: ms } or null
-  let exam = store.get(STORAGE_EXAM);
+  function loadPrefs() {
+    const saved = store.get(STORAGE_SETTINGS) || {};
+    const prefs = {};
+    for (const k of PREF_KEYS) if (k in saved) prefs[k] = saved[k];
+    return prefs;
+  }
+
+  function savePrefs() {
+    const prefs = {};
+    for (const k of PREF_KEYS) prefs[k] = settings[k];
+    store.set(STORAGE_SETTINGS, prefs);
+  }
+
+  let settings = { ...DEFAULTS, ...loadPrefs() };
+
+  // exam: { startAt: ms, pausedAt: ms|null, pausedTotal: ms } or null.
+  // Never restored after a refresh; also clear what older versions saved.
+  let exam = null;
+  store.remove(STORAGE_EXAM);
 
   // ---------- DOM ----------
   const $ = (id) => document.getElementById(id);
@@ -673,10 +692,6 @@
   }
 
   // ---------- Exam controls ----------
-  function saveExam() {
-    if (exam) store.set(STORAGE_EXAM, exam); else store.remove(STORAGE_EXAM);
-  }
-
   function scheduledStartMs(hhmm = settings.scheduledStart) {
     if (!hhmm) return null;
     const [h, m] = hhmm.split(":").map(Number);
@@ -695,7 +710,6 @@
     // Announce the start if it's happening now; don't replay announcements
     // when joining a clock-time exam that is already under way.
     lastE = e < 0 ? null : e < 5000 ? -1 : e;
-    saveExam();
     buildProgressMarks();
     requestWakeLock();
     if (settings.sound) chime(1); // also unlocks audio on first user gesture
@@ -717,7 +731,6 @@
       exam.pausedAt = t;
       el.live.textContent = "Exam paused";
     }
-    saveExam();
     render(false);
   }
 
@@ -749,7 +762,6 @@
     const target = st.phase === "reading" ? st.R : 0;
     exam.startAt -= target - st.e;
     if (st.phase === "upcoming") lastE = -1; // announce the start right away
-    saveExam();
     render(false);
   }
 
@@ -768,7 +780,6 @@
 
   function exitExam() {
     exam = null;
-    saveExam();
     hideAnnouncement();
     buildProgressMarks();
     render(false);
@@ -794,7 +805,7 @@
 
   function cycleTheme() {
     settings.theme = THEMES[(THEMES.indexOf(settings.theme) + 1) % THEMES.length];
-    store.set(STORAGE_SETTINGS, settings);
+    savePrefs();
     applySettings();
     const names = { dark: "Midnight", light: "Daylight", contrast: "High contrast" };
     el.live.textContent = `${names[settings.theme]} theme`;
@@ -1079,10 +1090,9 @@
       const st = exam && examState(now());
       if (st && st.phase !== "finished" && changed && settingsMode !== "start") {
         exam.startAt = scheduledStartMs();
-        saveExam();
       }
     }
-    store.set(STORAGE_SETTINGS, settings);
+    savePrefs();
     // Don't replay announcements that are now "in the past" because of changed durations
     lastE = exam ? examElapsed(now()) : null;
     applySettings();
@@ -1199,16 +1209,10 @@
     }
   });
 
-  // Keep multiple open tabs/windows (e.g. a laptop + a TV) in sync
+  // Keep display preferences in step across open tabs
   window.addEventListener("storage", (e) => {
-    if (e.key === STORAGE_EXAM) {
-      exam = store.get(STORAGE_EXAM);
-      lastE = exam ? examElapsed(now()) : null;
-      buildProgressMarks();
-      render(false);
-    } else if (e.key === STORAGE_SETTINGS) {
-      settings = { ...DEFAULTS, ...(store.get(STORAGE_SETTINGS) || {}) };
-      lastE = exam ? examElapsed(now()) : null;
+    if (e.key === STORAGE_SETTINGS) {
+      settings = { ...settings, ...loadPrefs() };
       applySettings();
     }
   });
