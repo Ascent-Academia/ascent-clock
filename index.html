@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en" data-clock-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ascent Academia · Exam Clock</title>
+  <meta name="description" content="A clean, full-screen exam clock for Ascent Academia trial exams. Shows the time, reading and writing time, elapsed-time milestones and time remaining.">
+  <meta name="theme-color" content="#0b1020">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#settings-btn">Skip to controls</a>
+
+  <div class="app" id="app">
+    <!-- Top bar: branding + exam name + controls -->
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M6 52 L26 18 L36 34 L42 25 L58 52 Z" fill="currentColor" opacity=".9"/>
+          <path d="M26 18 L31 26.5 L27.5 25 L24 28 Z" fill="var(--bg)" opacity=".85"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name">Ascent Academia</span>
+          <span class="exam-name" id="exam-name">Trial Examination</span>
+        </div>
+      </div>
+
+      <nav class="controls" id="controls" aria-label="Clock controls">
+        <button type="button" class="btn btn-primary" id="start-btn" aria-keyshortcuts="Space">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path id="start-icon" d="M8 5v14l11-7z"/></svg>
+          <span id="start-label">Start exam</span>
+        </button>
+        <button type="button" class="btn" id="reset-btn" aria-keyshortcuts="R" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+          <span id="reset-label">Reset</span>
+        </button>
+        <button type="button" class="btn icon-btn" id="theme-btn" aria-keyshortcuts="T" title="Change theme (T)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18V3z"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span class="sr-only">Change theme</span>
+        </button>
+        <button type="button" class="btn icon-btn" id="settings-btn" aria-keyshortcuts="S" title="Exam settings (S)" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+          <span class="sr-only">Exam settings</span>
+        </button>
+        <button type="button" class="btn icon-btn" id="fullscreen-btn" aria-keyshortcuts="F" title="Full screen (F)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path id="fs-icon" d="M4 9V4h5v2H6v3zm11-5h5v5h-2V6h-3zM6 15v3h3v2H4v-5zm12 3v-3h2v5h-5v-2z"/></svg>
+          <span class="sr-only" id="fs-label">Enter full screen</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main clock -->
+    <main class="stage" id="stage">
+      <div class="phase-pill" id="phase-pill" hidden>
+        <span class="phase-dot" aria-hidden="true"></span>
+        <span id="phase-text">Writing time</span>
+      </div>
+
+      <div class="clock-wrap">
+        <time class="clock" id="clock" aria-hidden="true"></time>
+        <span class="ampm" id="ampm" aria-hidden="true"></span>
+      </div>
+      <!-- Screen-reader friendly time, updated once a minute -->
+      <p class="sr-only" id="clock-sr" aria-live="off"></p>
+
+      <p class="date" id="date"></p>
+      <p class="sync-badge" id="sync-badge" hidden>Time corrected to internet time</p>
+    </main>
+
+    <!-- Exam status panel -->
+    <section class="exam-panel" id="exam-panel" aria-label="Exam progress" hidden>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Started</span>
+          <span class="stat-value" id="stat-start">--:--</span>
+        </div>
+        <div class="stat stat-strong">
+          <span class="stat-label" id="stat-elapsed-label">Elapsed</span>
+          <span class="stat-value" id="stat-elapsed">0:00:00</span>
+        </div>
+        <div class="stat stat-strong" id="stat-remaining-wrap">
+          <span class="stat-label" id="stat-remaining-label">Remaining</span>
+          <span class="stat-value" id="stat-remaining">0:00:00</span>
+        </div>
+        <div class="stat" id="stat-end-wrap">
+          <span class="stat-label">Finishes</span>
+          <span class="stat-value" id="stat-end">--:--</span>
+        </div>
+      </div>
+
+      <div class="progress" id="progress" role="progressbar" aria-label="Exam time used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-reading" id="progress-reading"></div>
+        <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-ticks" id="progress-ticks" aria-hidden="true"></div>
+      </div>
+
+      <div class="milestones" id="milestones" aria-hidden="true"></div>
+    </section>
+
+    <!-- Milestone announcement banner -->
+    <div class="announce" id="announce" aria-hidden="true">
+      <div class="announce-card">
+        <div class="announce-ring" aria-hidden="true"></div>
+        <div class="announce-kicker" id="announce-kicker">Milestone</div>
+        <div class="announce-title" id="announce-title">10 minutes have passed</div>
+        <div class="announce-sub" id="announce-sub"></div>
+      </div>
+    </div>
+    <!-- Live region for assistive tech -->
+    <div class="sr-only" id="live" role="status" aria-live="assertive" aria-atomic="true"></div>
+
+    <div class="shortcut-hint" id="shortcut-hint" aria-hidden="true">
+      <kbd>F</kbd> full screen · <kbd>Space</kbd> start / pause · <kbd>S</kbd> settings · <kbd>T</kbd> theme
+    </div>
+  </div>
+
+  <!-- Settings dialog -->
+  <dialog class="settings" id="settings" aria-labelledby="settings-title">
+    <form method="dialog" id="settings-form">
+      <header class="settings-head">
+        <h2 id="settings-title">Exam settings</h2>
+        <button type="button" class="btn icon-btn" id="settings-close" aria-label="Close settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6z"/></svg>
+        </button>
+      </header>
+
+      <fieldset>
+        <legend>Exam</legend>
+        <label class="field">
+          <span>Exam title</span>
+          <input type="text" name="examName" maxlength="80" placeholder="e.g. Mathematics Advanced — Trial HSC">
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span>Reading time <small>(minutes)</small></span>
+            <input type="number" name="readingMin" min="0" max="60" step="1" inputmode="numeric">
+          </label>
+          <label class="field">
+            <span>Writing time <small>(minutes, 0 = no end)</small></span>
+            <input type="number" name="durationMin" min="0" max="600" step="1" inputmode="numeric">
+          </label>
+        </div>
+        <label class="field">
+          <span>Scheduled start <small>(optional — leave blank to start with the button)</small></span>
+          <input type="time" name="scheduledStart">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Announcements</legend>
+        <label class="field">
+          <span>Announce every</span>
+          <select name="intervalMin">
+            <option value="0">Off</option>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+            <option value="20">20 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">60 minutes</option>
+          </select>
+        </label>
+        <div class="field">
+          <span id="warn-label">Warn when this much time remains</span>
+          <div class="chips" role="group" aria-labelledby="warn-label">
+            <label class="chip"><input type="checkbox" name="warn" value="60"><span>60 min</span></label>
+            <label class="chip"><input type="checkbox" name="warn" value="30"><span>30 min</span></label>
+            <label class="chip"><input type="checkbox" name="warn" value="15"><span>15 min</span></label>
+            <label class="chip"><input type="checkbox" name="warn" value="10"><span>10 min</span></label>
+            <label class="chip"><input type="checkbox" name="warn" value="5"><span>5 min</span></label>
+            <label class="chip"><input type="checkbox" name="warn" value="1"><span>1 min</span></label>
+          </div>
+        </div>
+        <label class="field">
+          <span>Banner stays on screen for</span>
+          <select name="bannerSec">
+            <option value="6">6 seconds</option>
+            <option value="10">10 seconds</option>
+            <option value="15">15 seconds</option>
+            <option value="30">30 seconds</option>
+          </select>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" name="sound">
+          <span>Play a soft chime with announcements</span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Display</legend>
+        <div class="field-row">
+          <label class="field">
+            <span>Clock format</span>
+            <select name="hour12">
+              <option value="false">24-hour (14:05:09)</option>
+              <option value="true">12-hour (2:05:09 PM)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Theme</span>
+            <select name="theme">
+              <option value="dark">Midnight (dark)</option>
+              <option value="light">Daylight (light)</option>
+              <option value="contrast">High contrast</option>
+            </select>
+          </label>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" name="showDate">
+          <span>Show the date</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" name="reduceMotion">
+          <span>Reduce motion</span>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Time accuracy</legend>
+        <p class="sync-status" id="sync-status" role="status">Not checked yet.</p>
+        <div>
+          <button type="button" class="btn" id="sync-now">Check clock now</button>
+        </div>
+      </fieldset>
+
+      <footer class="settings-foot">
+        <button type="button" class="btn" id="settings-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="settings-save">Save</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <noscript>
+    <div class="noscript">This exam clock needs JavaScript enabled to run.</div>
+  </noscript>
+
+  <script src="app.js"></script>
+</body>
+</html>
