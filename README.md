@@ -7,7 +7,7 @@
 A clean, full-screen exam clock for running VCE trial exams at Ascent Academia.
 It shows the time with seconds, reading and writing time, regular time checks and the time remaining. It is designed to be projected on a large TV or 4K projector.
 
-**Open the clock:** [https://ascentacademia.github.io/ascent-clock/](https://ascent-academia.github.io/ascent-clock/)
+**Open the clock:** https://ascent-academia.github.io/ascent-clock/
 
 It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, tablet or phone, with nothing to install.
 
