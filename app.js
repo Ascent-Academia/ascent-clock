@@ -437,8 +437,13 @@
 
   // ---------- Announcements ----------
   let announceTimer = null;
+  let hideEndTimer = null;
 
   function announce(evt) {
+    // If a banner is already up, swap its contents in place with a quick pop
+    // rather than fading the whole overlay out and back in.
+    const wasShowing = el.announce.classList.contains("show");
+    clearTimeout(hideEndTimer);
     el.announce.className = "announce";
     if (evt.tone !== "accent") el.announce.classList.add(`tone-${evt.tone}`);
     el.announceKicker.textContent = evt.kicker;
@@ -447,6 +452,7 @@
     // Force reflow so the entrance animation restarts for back-to-back events
     void el.announce.offsetWidth;
     el.announce.classList.add("show");
+    if (wasShowing) el.announce.classList.add("swap");
 
     el.live.textContent = `${evt.title}. ${evt.sub || ""}`.trim();
 
@@ -467,8 +473,12 @@
 
   function hideAnnouncement() {
     clearTimeout(announceTimer);
-    el.announce.classList.remove("show");
     el.app.classList.remove("flash");
+    if (!el.announce.classList.contains("show")) return;
+    el.announce.classList.remove("show", "swap");
+    el.announce.classList.add("hiding");
+    clearTimeout(hideEndTimer);
+    hideEndTimer = setTimeout(() => el.announce.classList.remove("hiding"), 200);
   }
 
   // Soft two-tone chime using Web Audio (no audio files needed)

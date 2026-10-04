@@ -1,6 +1,6 @@
 /* Offline support: network first, falling back to the cached copy so the
  * clock keeps working if the exam room loses Wi-Fi. */
-const CACHE = "ascent-clock-v3";
+const CACHE = "ascent-clock-v4";
 const ASSETS = ["./", "index.html", "styles.css", "app.js", "icon.svg", "favicon-32.png", "favicon-16.png", "manifest.webmanifest", "fonts/manrope-latin-var.woff2"];
 
 self.addEventListener("install", (e) => {

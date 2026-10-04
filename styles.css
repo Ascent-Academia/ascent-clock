@@ -338,7 +338,8 @@ body {
   color: var(--phase-color, var(--accent));
   background: color-mix(in srgb, var(--phase-color, var(--accent)) 14%, transparent);
   border: 2px solid color-mix(in srgb, var(--phase-color, var(--accent)) 45%, transparent);
-  animation: pill-in .8s var(--ease-out);
+  animation: pill-in .4s var(--ease-out);
+  transition: color .3s var(--ease-in-out), background-color .3s var(--ease-in-out), border-color .3s var(--ease-in-out);
 }
 .phase-pill[hidden] { display: none; }
 .phase-dot {
@@ -352,7 +353,7 @@ body {
   50% { opacity: .35; transform: scale(.75); }
 }
 @keyframes pill-in {
-  from { opacity: 0; transform: translateY(-12px) scale(.96); }
+  from { opacity: 0; transform: translateY(-6px) scale(.97); }
   to   { opacity: 1; transform: none; }
 }
 
@@ -461,11 +462,10 @@ body {
 #sync-now { font-size: .95em; }
 
 /* Pulse the whole clock briefly when a milestone fires */
-.app.flash .clock { animation: clock-flash 1.6s var(--ease-out); }
+.app.flash .clock { animation: clock-flash 1s var(--ease-out); }
+/* Colour only: a blurred text-shadow on the giant digits is expensive to paint */
 @keyframes clock-flash {
-  0%   { text-shadow: 0 0 0 transparent; }
-  25%  { text-shadow: 0 0 .15em color-mix(in srgb, var(--accent) 70%, transparent); color: var(--accent); }
-  100% { text-shadow: 0 0 0 transparent; }
+  20% { color: var(--accent); }
 }
 
 /* ---------- Exam panel ---------- */
@@ -598,18 +598,23 @@ body {
   place-items: center;
   pointer-events: none;
   z-index: 50;
-  opacity: 0;
-  transition: opacity .6s var(--ease-in-out);
+  visibility: hidden;
 }
+/* A plain translucent scrim: a full-screen backdrop blur has to be recomputed
+   every frame while the clock ticks underneath, which made the banner stutter. */
 .announce::before {
   content: "";
   position: absolute; inset: 0;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  opacity: 0;
+  transition: opacity .18s var(--ease-in-out);
+  will-change: opacity;
 }
 
-.announce.show { opacity: 1; pointer-events: auto; cursor: pointer; }
+.announce.show { visibility: visible; pointer-events: auto; cursor: pointer; }
+.announce.show::before { opacity: 1; transition-duration: .22s; }
+/* Keep the layer visible while the exit animation plays */
+.announce.hiding { visibility: visible; }
 
 .announce-dismiss {
   position: relative;
@@ -640,11 +645,26 @@ body {
   border: 3px solid var(--announce-color, var(--accent));
   box-shadow: var(--shadow), 0 0 8vmin color-mix(in srgb, var(--announce-color, var(--accent)) 35%, transparent);
   text-align: center;
-  transform: translateY(6vh) scale(.9);
-  transition: transform .9s var(--ease-out);
+  opacity: 0;
   overflow: hidden;
+  will-change: transform, opacity;
 }
-.announce.show .announce-card { transform: none; }
+.announce.show .announce-card { opacity: 1; animation: card-in .38s var(--ease-out) both; }
+.announce.hiding .announce-card { animation: card-out .18s var(--ease-in-out) both; }
+/* Back-to-back announcements swap in place instead of fading the overlay */
+.announce.show.swap .announce-card { animation: card-swap .3s var(--ease-out) both; }
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(2.5vh) scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes card-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: scale(.97); }
+}
+@keyframes card-swap {
+  from { transform: scale(.96); }
+  to   { transform: none; }
+}
 
 .announce-ring {
   position: absolute;
@@ -654,8 +674,9 @@ body {
   border-radius: 50%;
   border: .6vmin solid var(--announce-color, var(--accent));
   opacity: 0;
+  will-change: transform, opacity;
 }
-.announce.show .announce-ring { animation: ring 2.4s var(--ease-out) .2s 2; }
+.announce.show .announce-ring { animation: ring 1.8s var(--ease-out) .08s 2; }
 @keyframes ring {
   from { transform: scale(.4); opacity: .6; }
   to   { transform: scale(6); opacity: 0; }
