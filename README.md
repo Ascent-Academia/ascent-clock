@@ -7,7 +7,7 @@
 A clean, full-screen exam clock for running VCE trial exams at Ascent Academia.
 It shows the time with seconds, reading and writing time, regular time checks and the time remaining. It is designed to be projected on a large TV or 4K projector.
 
-**Open the clock:** https://ascent-academia.github.io/ascent-clock/
+**Open the clock:** [ascent-academia.github.io/ascent-clock](https://ascent-academia.github.io/ascent-clock/)
 
 It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, tablet or phone, with nothing to install.
 
@@ -78,6 +78,11 @@ Check these against the current VCAA exam timetable each year. The presets are s
 - **Keeps the screen awake** while an exam is running or the clock is in full screen, where the browser supports it.
 - Full keyboard control, screen-reader announcements for each time check, and a **Reduce motion** option (it also follows the computer's accessibility setting).
 
+You can also use the browser's **Install app / Add to Home Screen** option where
+supported. The web-app manifest requests a full-screen display; browser support
+determines the actual presentation. Installation uses the same clock and reset
+behaviour as a browser tab.
+
 ## Keyboard shortcuts
 
 | Key | Action |
@@ -99,6 +104,17 @@ To run it on your own computer instead:
 - Open `index.html` in a browser. Everything works except the internet-time check and offline mode, which need the page to be served from a web address.
 - Or serve the folder: `npx http-server .` (or `python3 -m http.server`) and open the address it prints.
 
+For a dependency-free local server:
+
+```bash
+python3 -m http.server 8000
+```
+
+Open `http://localhost:8000/`. Service-worker offline caching needs HTTPS or
+localhost. The internet-time check uses the host's HTTP `Date` header, so the
+server's time must itself be correct; a local server is not an independent time
+reference.
+
 ## Project files
 
 | Path | What it is |
@@ -106,12 +122,21 @@ To run it on your own computer instead:
 | `index.html` | Page structure, including the inline logo and the settings panel |
 | `styles.css` | Layout, themes and animations. Brand colours are the `--brand-*` variables at the top |
 | `app.js` | Clock, exam timing, announcements, time check and settings |
-| `sw.js` | Offline support. Increase `CACHE` (e.g. `ascent-clock-v3`) whenever you change a file, so browsers pick up the new version |
+| `sw.js` | Offline support. The current cache name is `ascent-clock-v4`; choose a new name when changing cached assets and keep `ASSETS` in sync with required local files. |
 | `brand/` | Official Ascent Academia logo files (brand violet `#8c68ac`) |
 | `fonts/` | Manrope typeface, stored locally so the clock works offline |
 | `icon.svg`, `favicon-*.png`, `apple-touch-icon.png`, `icon-*.png`, `icon-app.svg`, `manifest.webmanifest` | Browser tab icons, home-screen / installed-app icons and install-as-app details |
 
 There is no build step. Edit the files and push.
+
+## Checking a change
+
+This repository has no automated test suite or Actions workflow. Serve it locally
+and check the plain clock, scheduled start, reading-to-writing transition,
+pause/resume, announcements, theme/keyboard controls and refresh reset. For
+offline support, load the page online, allow its service worker to activate, then
+reload with the browser offline. Confirm the local Manrope font still loads.
+Check display sizing on the projector and a narrow screen before exam-day use.
 
 ## Credits
 
