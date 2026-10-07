@@ -13,6 +13,20 @@ It works in any modern browser (Chrome, Edge, Safari, Firefox) on a laptop, TV, 
 
 ---
 
+## Get Ascent apps through the package manager
+
+Download [**Ascent-Installer-Setup.exe** from Ascent Installer release Assets](https://github.com/Ascent-Academia/ascent-installer/releases/latest), run setup on Windows 10/11 x64, and open **Ascent Installer**. Sign in with your own GitHub account using the displayed browser device code; active Ascent-Academia membership and access to the relevant private repositories are required. Source-code ZIP/TAR downloads are developer files.
+
+In the catalogue, select **Browser apps → Ascent Exam Clock → Open app guide**.
+
+The clock runs in your browser. The catalogue opens this guide; it does not install a Windows executable. Browser refreshes receive the deployed site updates.
+
+For the supported Windows desktop apps, choose **Manage app → Install**, then use
+**Update**, **Repair** or **Uninstall** in the same manager. Native installations
+use supported Windows registration; older portable copies can be added with
+**Locate existing portable app…**. See the [installer guide](https://github.com/Ascent-Academia/ascent-installer#readme) for the full steps.
+
+
 ## On exam day
 
 1. Open the clock on the computer connected to the TV or projector, and press <kbd>F</kbd> for full screen.
