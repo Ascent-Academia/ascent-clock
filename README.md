@@ -136,7 +136,7 @@ reference.
 | `index.html` | Page structure, including the inline logo and the settings panel |
 | `styles.css` | Layout, themes and animations. Brand colours are the `--brand-*` variables at the top |
 | `app.js` | Clock, exam timing, announcements, time check and settings |
-| `sw.js` | Offline support. The current cache name is `ascent-clock-v4`; choose a new name when changing cached assets and keep `ASSETS` in sync with required local files. |
+| `sw.js` | Offline support. The current cache name is `ascent-clock-v5`; choose a new name when changing cached assets and keep `ASSETS` in sync with required local files. |
 | `brand/` | Official Ascent Academia logo files (brand violet `#8c68ac`) |
 | `fonts/` | Manrope typeface, stored locally so the clock works offline |
 | `icon.svg`, `favicon-*.png`, `apple-touch-icon.png`, `icon-*.png`, `icon-app.svg`, `manifest.webmanifest` | Browser tab icons, home-screen / installed-app icons and install-as-app details |
@@ -145,8 +145,8 @@ There is no build step. Edit the files and push.
 
 ## Checking a change
 
-This repository has no automated test suite or Actions workflow. Serve it locally
-and check the plain clock, scheduled start, reading-to-writing transition,
+Run the dependency-free offline-cache regression tests with `node --test tests/*.test.cjs`
+(Node.js 18+). This repository has no Actions workflow. Serve it locally and check the plain clock, scheduled start, reading-to-writing transition,
 pause/resume, announcements, theme/keyboard controls and refresh reset. For
 offline support, load the page online, allow its service worker to activate, then
 reload with the browser offline. Confirm the local Manrope font still loads.

@@ -1,6 +1,7 @@
 /* Offline support: network first, falling back to the cached copy so the
  * clock keeps working if the exam room loses Wi-Fi. */
-const CACHE = "ascent-clock-v4";
+const CACHE_PREFIX = "ascent-clock-";
+const CACHE = `${CACHE_PREFIX}v5`;
 const ASSETS = ["./", "index.html", "styles.css", "app.js", "icon.svg", "favicon-32.png", "favicon-16.png", "manifest.webmanifest", "fonts/manrope-latin-var.woff2"];
 
 self.addEventListener("install", (e) => {
@@ -10,20 +11,25 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
+  const cached = () => caches.match(e.request, { cacheName: CACHE, ignoreSearch: true });
   e.respondWith(
     fetch(e.request)
-      .then((res) => {
+      .then(async (res) => {
+        // A temporary server error must not replace a working offline asset.
+        if (!res.ok) return (await cached()) || res;
         const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy));
+        // Keep the worker alive until storage finishes, without turning a cache
+        // quota failure into a failed network response.
+        e.waitUntil(caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {}));
         return res;
       })
-      .catch(() => caches.match(e.request, { ignoreSearch: true }))
+      .catch(async () => (await cached()) || Response.error())
   );
 });
